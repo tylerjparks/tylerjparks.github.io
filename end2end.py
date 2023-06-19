@@ -205,7 +205,7 @@ def classifySkills(skills):
 # Purpose:  IN-PROGRESS -- COMBINES ALL CLASSIFICATIONS AND SKILLS INTO A SINGLE
 #           ENCOMPASSING DATA STRUCT
 #
-def createOutcomes(classification, skills):
+def createOutcomes(classification, skills):  
   outcomes = {classification[i]: skills[i] for i in range(len(classification))}
   outcomes = list(set(classification))
 
@@ -594,7 +594,8 @@ for j in range(NUM_CLUSTERS, NUM_CLUSTERS+1):
 
 print('Collecting User Input...')
 
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+#url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
 df_userinput = pd.read_csv(open_url(url))
 
 SKILLS_LIST = []
@@ -603,25 +604,43 @@ OUTCOMES_LIST = []
 #FEDERAL_INDUSTRIAL = []
 #ENTRY_LEVEL = []
 
+df_userinput = df_userinput.sample(frac=1)
+df_userinput = df_userinput.head(1)
+
 print('Processing Objects...')
 for index, row in df_userinput.iterrows():
+  print('The full-text description input:')
+  print('************************************************************')
+  print(row['description'])
+  print('************************************************************')
+  print()
 
   # SKILLS EXTRACTION
   skills = corpusExtraction(row['description'])
+  print('The SKILLS collected from Job Posting:')
+  print(skills)
+  print()
   SKILLS_LIST.append(skills)
 
   # SKILLS CLASSIFICATION
   classified = classifySkills(skills)
+  print('The CLASSIFICATIONS used for Job Posting:')
+  print(classified)
+  print()
   CLASSIFIED_LIST.append(classified)
 
   # OUTCOME CREATION
   outcomes = createOutcomes(classified, skills)
+  print('The OUTCOMES generated from Job Posting:')
+  print(outcomes)
+  print()
   OUTCOMES_LIST.append(outcomes)
 
   #FEDERAL_INDUSTRIAL.append('federal')
   #ENTRY_LEVEL.append(1)
 
-df_userinput.insert(0, 'skills', SKILLS_LIST)
+try: df_userinput.insert(0, 'skills', SKILLS_LIST)
+except: pass
 df_userinput.insert(0, 'classified', CLASSIFIED_LIST)
 df_userinput.insert(0, 'outcomes', OUTCOMES_LIST)
 
