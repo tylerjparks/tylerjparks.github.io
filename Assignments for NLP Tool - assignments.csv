@@ -1,4 +1,4 @@
-CID,university,class_title,class_code,assessment_title,assessment_type,descript
+CID,university,class_title,class_code,assessment_title,assessment_type,description
 BpZXWVLxfJAjBEJ2FRoldh8rg69iF8D2,The University of North Texas,INTRO TO COMPUTER SCIENCE,1030,Algorthims,Homework,"Homework 1 Algorithm Declare a variable that represents velocity as a float because velocity can be measured down to the decimal and not just as a whole number. Declare a variable that represents acceleration as a float because, just like velocity, acceleration can be measured down to the decimal place also.Declare a variable for time which is represented in seconds as a float because time can be represented as a decimal.Declare a variable for displacement that is also a float and is found using the equation for displacement, which involves using your velocity, time, and acceleration variables that were declared earlier. Use cout to ask the user for the velocity which is in meters per second.Use cin so the user can put in a value for the velocity and save it in the velocity variable declared earlier.Use cout to ask the user for the acceleration which is in meters per second squared.Use cin so the user can put in a value for the acceleration and save it in the acceleration variable declared earlier. Use cout to ask the user for the time which is represented in seconds.Use cin so the user can input a value for the time and save it in the time variable that was declared earlier. For the displacement variable, set it equal to (velocity*time) + ½(acceleration)(time)2. This will get you your displacement in meters.oExample Calculation: Velocity = 2.52Acceleration = 5.25Time = 16.25(2.52) (16.25) + ½ (5.25) (16.25)2 40.95 + 693.1640625734.1140625 metersNext to get make sure that your answer rounds to the hundredths place use cout. precision (2) before your displacement equation. This will result in displacement being rounded to two decimal places. Use cout to read in a line stating what the displacement (which will be found using the displacement equation) is in meters.Return 0."
 GfdDcIsO9z13V83okl2ydXMJPt8AllgS,The University of North Texas,INTRO TO COMPUTER SECURITY,5550,Buffer Overflow,Lab,"Student Name:
 Course: CSCE 5550
@@ -1842,7 +1842,8 @@ Consider the same-origin policy (SOP) and briefly explain why this option would 
 Unfortunately, the https://untsites.edu/[NAME] solution can still be attacked. Again, with SOP in mind, describe the limitation to this design and suggest a possible solution to address this issue.
 
 
-"
+
+"
 4g2IiDYlGlrBD2Gw4x09hCjJIu3NOU80,The University of North Texas,SECURE ECOMMERCE,5560,Cybersecurity Attacks 2,Homework,"Homework 5
 Due: 11:59 PM on Friday, April 8, 2022
 Please answer in your own words and show any and all work.
@@ -1919,7 +1920,8 @@ Level 3: That sinking feeling…
 
 
 
-"
+
+"
 oiHUOedqtowKHjfSqIZdlt0TzV0YKOVg,The University of North Texas,SECURE ECOMMERCE,5560,Cybersecurity Attacks 3,Lab,"Lab 2: Information Gathering and WebGoat Attacks Lab
 
 This lab uses the Kali 2021 virtual machine (VM) as OVA file KALI-20.ova on Canvas. The credentials are as follows: 
@@ -2145,7 +2147,8 @@ Room Number	Over 6000 A’s or any characters as shown below
 
 Q9:	What is John Smith’s room number? Attach a screenshot of the web page showing the details.
 
-"
+
+"
 odJFIstJK6kV2i4puLjc4bigsROxkqve,The University of North Texas,MACHINE LEARNING,5215,Data Preprocessing,Homework,"Pre-Processing for Project 1
 The dataset that will be used for this project is the Glass Identification dataset. Here is a description of the data which is taken from the University of California Irvine Machine Learning (UCI ML) repository.
 Number of Instances: 214
@@ -2420,7 +2423,8 @@ Identify and describe at least one disadvantage of the layered architecture appr
 
 
 (10 points) What is meant by a static web page? Briefly describe at least two disadvantages of building a web site using static pages. Are there any advantages? If so, list at least two of them
-"
+
+"
 Dh7FWBapC5q4lpiFpn4Q0fKAcEfpVHVK,The University of North Texas,INTRO TO COMPUTER SECURITY,3550,Encryption System Development,Project,"CSCE 3550 Foundations of Cybersecurity Spring 2022
 1
 Project 3
