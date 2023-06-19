@@ -2,6 +2,21 @@
 import warnings
 warnings.filterwarnings('ignore')
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def writelines(self, datas):
+       self.stream.writelines(datas)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+import sys
+sys.stdout = Unbuffered(sys.stdout)
+
 ###         ###
 ###         ###
 ### IMPORTS ###
@@ -31,6 +46,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report
 from sklearn.cluster import SpectralClustering
+
+from pyodide.http import open_url
 
 # Install and Import pymongo
 # !pip install pymongo
@@ -242,7 +259,7 @@ def loadData(corpusType, filename):
   labeledCorpus = pd.read_csv(filename)
 
   try:
-    labeledCorpus = labeledCorpus.drop(columns=['descript'])
+    labeledCorpus = labeledCorpus.drop(columns=['description'])
   except: pass
 
   listofJSONs = []
@@ -376,7 +393,9 @@ yake_Extractor = yake.KeywordExtractor(lan='en', n=3, dedupLim=0.95, dedupFunc='
 # ------------------------------------------------------------------------------
 # Collecting KSAT Data
 print('Collecting KSAT Data...')
-knowledgeDF = pd.read_csv('KSAT Mappings for NLP Model - Knowledge Unit Mapping.csv')
+
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Knowledge%20Unit%20Mapping.csv"
+knowledgeDF = pd.read_csv(open_url(url))
 
 # drop empty
 knowledgeDF.dropna(subset=['TIER1 JOB'], inplace=True)
@@ -385,7 +404,8 @@ knowledgeDF.dropna(subset=['TIER1 JOB'], inplace=True)
 ko = 'Knowledge of '
 knowledgeDF['SKILL'] = knowledgeDF['SKILL'].map(lambda x: x.replace(ko, ''))
 
-skillDF = pd.read_csv('KSAT Mappings for NLP Model - Skill Unit Mapping.csv')
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Skill%20Unit%20Mapping.csv"
+skillDF = pd.read_csv(open_url(url))
 
 # drop empty
 skillDF.dropna(subset=['TIER1 JOB'], inplace=True)
@@ -394,7 +414,8 @@ skillDF.dropna(subset=['TIER1 JOB'], inplace=True)
 si = 'Skill in '
 skillDF['SKILL'] = skillDF['SKILL'].map(lambda x: x.replace(si, ''))
 
-abilityDF = pd.read_csv('KSAT Mappings for NLP Model - Ability Unit Mapping.csv')
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Ability%20Unit%20Mapping.csv"
+abilityDF = pd.read_csv(open_url(url))
 
 # drop empty
 abilityDF.dropna(subset=['TIER1 JOB'], inplace=True)
@@ -403,7 +424,8 @@ abilityDF.dropna(subset=['TIER1 JOB'], inplace=True)
 at = 'Ability to '
 abilityDF['SKILL'] = abilityDF['SKILL'].map(lambda x: x.replace(at, ''))
 
-taskDF = pd.read_csv('KSAT Mappings for NLP Model - Task Unit Mapping.csv')
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Task%20Unit%20Mapping.csv"
+taskDF = pd.read_csv(open_url(url))
 
 # drop empty
 # nothing in 'SKILL' to drop
@@ -571,7 +593,9 @@ for j in range(NUM_CLUSTERS, NUM_CLUSTERS+1):
 
 
 print('Collecting User Input...')
-df_userinput = pd.read_csv('Labeled - federal200.csv')
+
+url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+df_userinput = pd.read_csv(open_url(url))
 
 SKILLS_LIST = []
 CLASSIFIED_LIST = []
@@ -583,7 +607,7 @@ print('Processing Objects...')
 for index, row in df_userinput.iterrows():
 
   # SKILLS EXTRACTION
-  skills = corpusExtraction(row['descript'])
+  skills = corpusExtraction(row['description'])
   SKILLS_LIST.append(skills)
 
   # SKILLS CLASSIFICATION
@@ -596,7 +620,6 @@ for index, row in df_userinput.iterrows():
 
   #FEDERAL_INDUSTRIAL.append('federal')
   #ENTRY_LEVEL.append(1)
-  break
 
 df_userinput.insert(0, 'skills', SKILLS_LIST)
 df_userinput.insert(0, 'classified', CLASSIFIED_LIST)
@@ -606,7 +629,7 @@ df_userinput.insert(0, 'outcomes', OUTCOMES_LIST)
 #df_userinput.insert(0, 'entry_level', ENTRY_LEVEL)
 
 df_userinput.to_csv('userinput-extracted.csv', index=False)
-print('complete')
+print('Complete!')
 """
 # Get user password
 #password = getpass()
