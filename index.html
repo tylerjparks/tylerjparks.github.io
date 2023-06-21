@@ -4,17 +4,34 @@
         <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
         <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     </head>
-<body>
-<h1>Learning Outcome Alignment</h1>
-<h2>Demo Tool</h2>
-<p>Hosted with GitHub Pages.</p>
-<hr>
+    <body>
+        <h1>Learning Outcome Alignment</h1>
+        <h2>Demo Tool</h2>
+        
+        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button">Test a new random Job Posting!</button>
+        
+        <hr>
+        <div>
+            Python Terminal
+            <py-terminal>
+        </div>
+        <hr>
+        
+        <div id="display-write"></div>
 
-<py-config>
-    packages = ["pandas", "yake", "scikit-learn"]
-</py-config>
-
-<py-script src="/end2end.py"></py-script>
-
-</body>
+        <script>
+            function clearDiv() {
+               // access the div element and use the replaceChildren() method to clear the div content
+               let div = document.getElementById("display-write");
+               div.replaceChildren();
+            }
+         </script>
+        
+        <py-config>
+            packages = ["pandas", "yake", "scikit-learn"]
+        </py-config>
+        
+        <py-script src="/end2end.py"></py-script>
+        
+    </body>
 </html>

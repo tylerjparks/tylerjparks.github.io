@@ -48,6 +48,7 @@ from sklearn.metrics import classification_report
 from sklearn.cluster import SpectralClustering
 
 from pyodide.http import open_url
+from pyscript import Element
 
 # Install and Import pymongo
 # !pip install pymongo
@@ -146,6 +147,12 @@ def list2string(l, delim):
   for i in l:
     s = s + i + delim
   
+  if s[-1] == ' ':
+    s = s[:-1]
+
+  if s[-1] == delim:
+    s = s[:-1]
+
   return s
 # 
 # END list2string()
@@ -205,16 +212,22 @@ def classifySkills(skills):
 # Purpose:  IN-PROGRESS -- COMBINES ALL CLASSIFICATIONS AND SKILLS INTO A SINGLE
 #           ENCOMPASSING DATA STRUCT
 #
-def createOutcomes(classification, skills):  
-  outcomes = {classification[i]: skills[i] for i in range(len(classification))}
-  outcomes = list(set(classification))
+def createOutcomes(classification, skills):
+  l = []
+  k = []
 
-  for i in range(0,len(outcomes)):
+  uniqueClassifications = unique(classification)
+
+  for i in uniqueClassifications:
+    l = []
     for j in range(0,len(classification)):
-      if outcomes[i] == classification[j]:
-        outcomes[i] += ' ' + skills[j]
+      if classification[j] == i:
+        l.append(skills[j])
+    
+    i += '$' + list2string(l, ', ')
+    k.append(i)
 
-  return outcomes
+  return k
 #
 # END createOutcomes()
 
@@ -374,7 +387,16 @@ def NLPthoseOutcomes(outcomeSet):
 #
 # END NLPthoseOutcomes()
 
-
+#-------------------------------------------------------------------------------
+# Function: display_to_div()
+#
+# Params:   string
+# Purpose:  Displays string to HTML screen
+#
+def display_to_div(txt):
+  display(txt, target="display-write")
+#
+# END display_to_div()
 
 
 
@@ -392,7 +414,7 @@ yake_Extractor = yake.KeywordExtractor(lan='en', n=3, dedupLim=0.95, dedupFunc='
 
 # ------------------------------------------------------------------------------
 # Collecting KSAT Data
-print('Collecting KSAT Data...')
+print('Collecting KSAT Data...', end=' ')
 
 url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Knowledge%20Unit%20Mapping.csv"
 knowledgeDF = pd.read_csv(open_url(url))
@@ -435,6 +457,8 @@ taskDF.dropna(subset=['TIER1 JOB'], inplace=True)
 frames = [knowledgeDF, skillDF, abilityDF, taskDF]
 
 mappingDF = pd.concat(frames)
+
+print('Collected!')
 # ------------------------------------------------------------------------------
 # END collecting KSAT Data
 
@@ -589,102 +613,122 @@ for j in range(NUM_CLUSTERS, NUM_CLUSTERS+1):
   for classes in temp:
     classesPercent.append(classes + ' - ' + str(labels.pop(0)) + ' - ' + str(percentages.pop(0)) + '%')
 
+print('Trained!')
+# ------------------------------------------------------------------------------
+# END model training
+print()
+print('Now, click the button above to extract the skills from a job posting!')
 
+def buttonExecution():
 
+  #url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
+  df_userinput = pd.read_csv(open_url(url))
 
-print('Collecting User Input...')
+  SKILLS_LIST = []
+  CLASSIFIED_LIST = []
+  OUTCOMES_LIST = []
+  #FEDERAL_INDUSTRIAL = []
+  #ENTRY_LEVEL = []
 
-#url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
-df_userinput = pd.read_csv(open_url(url))
+  df_userinput = df_userinput.sample(frac=1)
+  df_userinput = df_userinput.head(1)
 
-SKILLS_LIST = []
-CLASSIFIED_LIST = []
-OUTCOMES_LIST = []
-#FEDERAL_INDUSTRIAL = []
-#ENTRY_LEVEL = []
+  for index, row in df_userinput.iterrows():
+    jobtitle = 'Full-Text Description for ' + row['title']
+    display_to_div(jobtitle)
+    display_to_div('ㅤ')
+    jobdesc = row['description']
+    jobdesc = jobdesc[:1000]
+    display_to_div(jobdesc + '...')
+    display_to_div('ㅤ')
 
-df_userinput = df_userinput.sample(frac=1)
-df_userinput = df_userinput.head(1)
+    # SKILLS EXTRACTION
+    skills = corpusExtraction(row['description'])
+    display_to_div('1. The SKILLS collected from Job Posting:')
+    for i in skills: display_to_div('> ' + i)
+    display_to_div('ㅤ')
+    SKILLS_LIST.append(skills)
 
-print('Processing Objects...')
-for index, row in df_userinput.iterrows():
-  print('The full-text description input:')
-  print('************************************************************')
-  print(row['description'])
-  print('************************************************************')
-  print()
+    # SKILLS CLASSIFICATION
+    classified = classifySkills(skills)
+    display_to_div('2. The unique CLASSIFICATIONS assigned to this Job Posting:')
+    for i in unique(classified): display_to_div('> ' + i)
+    display_to_div('ㅤ')
+    CLASSIFIED_LIST.append(classified)
 
-  # SKILLS EXTRACTION
-  skills = corpusExtraction(row['description'])
-  print('The SKILLS collected from Job Posting:')
-  print(skills)
-  print()
-  SKILLS_LIST.append(skills)
+    # OUTCOME CREATION
+    outcomes = createOutcomes(classified, skills)
+    display_to_div('3. The OUTCOMES generated from Job Posting:')
 
-  # SKILLS CLASSIFICATION
-  classified = classifySkills(skills)
-  print('The CLASSIFICATIONS used for Job Posting:')
-  print(classified)
-  print()
-  CLASSIFIED_LIST.append(classified)
+    for i in outcomes: 
+      outcomeString = i.split('$')
 
-  # OUTCOME CREATION
-  outcomes = createOutcomes(classified, skills)
-  print('The OUTCOMES generated from Job Posting:')
-  print(outcomes)
-  print()
-  OUTCOMES_LIST.append(outcomes)
+      for decompedString in outcomeString:
+        if ',' in decompedString:
+          skillsList = decompedString.split(', ')
+          for indivSkill in skillsList:
+            if indivSkill[len(indivSkill)-1] == ',':
+              indivSkill = indivSkill[:-1]
+            display_to_div('>> ' + indivSkill)
+          display_to_div('ㅤ')
 
-  #FEDERAL_INDUSTRIAL.append('federal')
-  #ENTRY_LEVEL.append(1)
+        else: 
+          display_to_div('> ' + decompedString)
 
-try: df_userinput.insert(0, 'skills', SKILLS_LIST)
-except: pass
-df_userinput.insert(0, 'classified', CLASSIFIED_LIST)
-df_userinput.insert(0, 'outcomes', OUTCOMES_LIST)
+    display_to_div('ㅤ')
+    OUTCOMES_LIST.append(outcomes)
 
-#df_userinput.insert(0, 'federal_industrial', FEDERAL_INDUSTRIAL)
-#df_userinput.insert(0, 'entry_level', ENTRY_LEVEL)
+    #FEDERAL_INDUSTRIAL.append('federal')
+    #ENTRY_LEVEL.append(1)
 
-df_userinput.to_csv('userinput-extracted.csv', index=False)
-print('Complete!')
-"""
-# Get user password
-#password = getpass()
-#password MIGHT equal simcity4
-password = 'simcity4'
+  try: df_userinput.insert(0, 'skills', SKILLS_LIST)
+  except: pass
+  df_userinput.insert(0, 'classified', CLASSIFIED_LIST)
+  df_userinput.insert(0, 'outcomes', OUTCOMES_LIST)
 
-# Create MongoDB connection URL
-uri = "mongodb+srv://test-user:"+password+"@m0cluster.4phwiir.mongodb.net/?retryWrites=true&w=majority"
+  #df_userinput.insert(0, 'federal_industrial', FEDERAL_INDUSTRIAL)
+  #df_userinput.insert(0, 'entry_level', ENTRY_LEVEL)
 
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
+  #df_userinput.to_csv('userinput-extracted.csv', index=False)
 
-# Clear password var
-password = ''
+  display_to_div('Complete!')
+  """
+  # Get user password
+  #password = getpass()
+  #password MIGHT equal simcity4
+  password = 'simcity4'
 
-assessmentsDB = client.assessments
-postingsDB    = client.postings
-assessmentCollection1 = assessmentsDB.assessment1
-postingCollection1 = postingsDB.posting1
+  # Create MongoDB connection URL
+  uri = "mongodb+srv://test-user:"+password+"@m0cluster.4phwiir.mongodb.net/?retryWrites=true&w=majority"
 
-assessmentData = loadData('assessments','Labeled - assessments.csv')
-#federalData = loadData('postings','Labeled - federal200.csv')
-#industryData = loadData('postings','Labeled - indeed4500.csv')
+  # Create a new client and connect to the server
+  client = MongoClient(uri, server_api=ServerApi('1'))
 
-print('Posting Assessments to MongoDB Database...')
-postJSONtoDBcollection(assessmentData, assessmentCollection1)
+  # Clear password var
+  password = ''
 
-print('Objects Posted to Database!')
-"""
-"""
-NLP_ASSESSMENTS = NLPthoseOutcomes(AssignmentOutcomes)
-NLP_INDUSTRY    = NLPthoseOutcomes(IndustryOutcomes)
-NLP_CAE         = NLPthoseOutcomes(CAEOutcomes)
-NLP_FEDERAL     = NLPthoseOutcomes(FederalOutcomes)
+  assessmentsDB = client.assessments
+  postingsDB    = client.postings
+  assessmentCollection1 = assessmentsDB.assessment1
+  postingCollection1 = postingsDB.posting1
 
-print('ASSESMENT vs CAE', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_CAE))
-print('ASSESMENT vs INDUSTRY', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_INDUSTRY))
-print('ASSESMENT vs FEDERAL', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_FEDERAL))
-"""
+  assessmentData = loadData('assessments','Labeled - assessments.csv')
+  #federalData = loadData('postings','Labeled - federal200.csv')
+  #industryData = loadData('postings','Labeled - indeed4500.csv')
+
+  print('Posting Assessments to MongoDB Database...')
+  postJSONtoDBcollection(assessmentData, assessmentCollection1)
+
+  print('Objects Posted to Database!')
+  """
+  """
+  NLP_ASSESSMENTS = NLPthoseOutcomes(AssignmentOutcomes)
+  NLP_INDUSTRY    = NLPthoseOutcomes(IndustryOutcomes)
+  NLP_CAE         = NLPthoseOutcomes(CAEOutcomes)
+  NLP_FEDERAL     = NLPthoseOutcomes(FederalOutcomes)
+
+  print('ASSESMENT vs CAE', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_CAE))
+  print('ASSESMENT vs INDUSTRY', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_INDUSTRY))
+  print('ASSESMENT vs FEDERAL', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_FEDERAL))
+  """
