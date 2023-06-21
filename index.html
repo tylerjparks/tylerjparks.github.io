@@ -25,19 +25,14 @@
         </div>
         <div class=".btn-container">
             <button onclick="clearDiv()" py-click="pullNewPosting()" class="py-button" style="margin-left: 10px; background-color: grey" disabled>Isolate Posting</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 160px; background-color: grey" disabled>Isolate Step 1</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 155px; background-color: grey" disabled>Isolate Step 2</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 155px; background-color: grey" disabled>Isolate Step 3</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 160px; background-color: grey" disabled>Isolate Step 4</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 128px; background-color: grey" disabled>Show Assessments</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 94px; background-color: grey" disabled>Isolate Step 1</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 105px; background-color: grey" disabled>Isolate Step 2</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 100px; background-color: grey" disabled>Isolate Step 3</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 105px; background-color: grey" disabled>Isolate Step 4</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 80px; background-color: grey" disabled>Show Assessments</button>
         </div>
         <hr style="border: 2px solid">
 
-        <div>
-            <h3>Python Output Terminal</h3>
-            <py-terminal>
-        </div>
-        <hr style="border: 2px solid">
         <h3>Job Posting Analysis</h3>
 
         <div id="display-write"></div>
@@ -49,6 +44,13 @@
         <py-script src="/end2end.py"></py-script>
 
         <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button" href="#top">Back to Top with new Posting!</button>
+        
+        <hr style="border: 2px solid">
+        <div>
+            <h3>Python Output Terminal</h3>
+            <py-terminal>
+        </div>
+        <hr style="border: 2px solid">
 
         <script>
             function clearDiv() {
