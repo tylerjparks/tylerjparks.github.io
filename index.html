@@ -1,37 +1,62 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- py-script stylesheet and scripts -->
         <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
         <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+        <style>
+          .img-container {
+            text-align: center;
+            display: block;
+            left: 50%;
+          }
+        </style>
     </head>
     <body>
-        <h1>Learning Outcome Alignment</h1>
-        <h2>Demo Tool</h2>
+        <h1>Learning Outcome Alignment - Demo Tool</h1>
         
-        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button">Test a new random Job Posting!</button>
-        
-        <hr>
+        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button">Start here with a new random Job Posting!</button>
+
+        <hr style="border: 2px solid">
+        <h3>Demo Tool Flow Diagram</h3>
+        <div class=".img-container">
+            <img src="flow.PNG" alt="Flow">
+        </div>
+        <div class=".btn-container">
+            <button onclick="clearDiv()" py-click="pullNewPosting()" class="py-button" style="margin-left: 10px; background-color: grey" disabled>Isolate Posting</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 160px; background-color: grey" disabled>Isolate Step 1</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 155px; background-color: grey" disabled>Isolate Step 2</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 155px; background-color: grey" disabled>Isolate Step 3</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 160px; background-color: grey" disabled>Isolate Step 4</button>
+            <button onclick="clearDiv()" class="py-button" style="margin-left: 128px; background-color: grey" disabled>Show Assessments</button>
+        </div>
+        <hr style="border: 2px solid">
+
         <div>
-            Python Terminal
+            <h3>Python Output Terminal</h3>
             <py-terminal>
         </div>
-        <hr>
-        
+        <hr style="border: 2px solid">
+        <h3>Job Posting Analysis</h3>
+
         <div id="display-write"></div>
+
+        <py-config>
+            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy"]
+        </py-config>
+        
+        <py-script src="/end2end.py"></py-script>
+
+        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button" href="#top">Back to Top with new Posting!</button>
 
         <script>
             function clearDiv() {
                // access the div element and use the replaceChildren() method to clear the div content
                let div = document.getElementById("display-write");
                div.replaceChildren();
+               window.location.href='#top'
             }
          </script>
-        
-        <py-config>
-            packages = ["pandas", "yake", "scikit-learn"]
-        </py-config>
-        
-        <py-script src="/end2end.py"></py-script>
-        
     </body>
 </html>

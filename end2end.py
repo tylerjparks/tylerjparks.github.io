@@ -34,6 +34,10 @@ import yake
 # !pip install pandas
 import pandas as pd
 
+# Install and Import fuzzywuzzy
+# !pip install fuzzywuzzy
+from fuzzywuzzy import fuzz
+
 # Install and Import scikit-learn
 # !pip install scikit-learn
 from sklearn.model_selection import train_test_split
@@ -393,10 +397,142 @@ def NLPthoseOutcomes(outcomeSet):
 # Params:   string
 # Purpose:  Displays string to HTML screen
 #
+
 def display_to_div(txt):
   display(txt, target="display-write")
 #
 # END display_to_div()
+
+#-------------------------------------------------------------------------------
+# Function: pullNewPosting()
+#
+# Params:   
+# Purpose:  
+#
+def pullNewPosting():
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
+  df_userinput = pd.read_csv(open_url(url))
+
+  df_userinput = df_userinput.sample(frac=1)
+  df_userinput = df_userinput.head(1)
+
+  for index, row in df_userinput.iterrows():
+    jobtitle = row['title']
+    jobdesc = row['description']
+    jobdescSHORT = jobdesc[:1000]
+
+    # Display Job Title
+    display_to_div(jobtitle)
+    display_to_div('ㅤ')
+
+    # Display Job Description
+    display_to_div(jobdescSHORT + '...')
+    display_to_div('ㅤ')
+  
+  return jobdesc
+#
+# END pullNewPosting()
+
+#-------------------------------------------------------------------------------
+# Function: isolateStep1()
+#
+# Params:   
+# Purpose:  
+#
+def isolateStep1():
+  pass
+#
+# END isolateStep1()
+
+#-------------------------------------------------------------------------------
+# Function: isolateStep2()
+#
+# Params:   
+# Purpose:  
+#
+def isolateStep2():
+  pass
+#
+# END isolateStep2()
+
+#-------------------------------------------------------------------------------
+# Function: isolateStep3()
+#
+# Params:   
+# Purpose:  
+#
+def isolateStep3():
+  pass
+#
+# END isolateStep3()
+
+#-------------------------------------------------------------------------------
+# Function: computeAlignment()
+#
+# Params:   
+# Purpose:  
+#
+def computeAlignment(inputOutcomes, assessmentOutcomes):
+  inputOutcomes = inputOutcomes[0]
+  #count = 0
+  #match = 0
+
+  lenientCount = 0
+  lenientMatch = 0
+
+  for ioutcome in inputOutcomes:
+    for outcomes in assessmentOutcomes:       # for each assignment
+      for outcome in outcomes:
+        temp1 = ioutcome.split('$')
+        temp2 = outcome.split('$')
+
+        ioName = temp1[0]
+        oName = temp2[0]
+
+        ioSkills = temp1[1]
+        oSkills = temp2[1]
+
+        lenientMatch += fuzz.partial_ratio(ioSkills,oSkills)
+        lenientCount += 1
+
+        # Strict Matching
+        #
+        #if(ioName == oName):
+        #  match += fuzz.partial_ratio(ioSkills,oSkills)
+        #  count += 1
+
+    #print(match/count)
+    averageMatch = lenientMatch/lenientCount
+  return averageMatch
+#
+# END computeAlignment()
+
+#-------------------------------------------------------------------------------
+# Function: getAssessmentOutcomes()
+#
+# Params:   
+# Purpose:  
+#
+def getAssessmentOutcomes():
+  outcomeList = []
+
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+  df_assessments = pd.read_csv(open_url(url))
+  
+  for index, row in df_assessments.iterrows():
+    skills = corpusExtraction(row['description'])
+    outcomes = createOutcomes(classifySkills(skills), skills)
+    outcomeList.append(outcomes)
+
+  return outcomeList
+#
+# END getAssessmentOutcomes()
+
+
+
+
+
+
 
 
 
@@ -614,10 +750,17 @@ for j in range(NUM_CLUSTERS, NUM_CLUSTERS+1):
     classesPercent.append(classes + ' - ' + str(labels.pop(0)) + ' - ' + str(percentages.pop(0)) + '%')
 
 print('Trained!')
-# ------------------------------------------------------------------------------
 # END model training
+
+# Collecting Assessments and Creating Assessment Outcomes
+print('Collecting Assessments and Creating Assessment Outcomes... ', end=' ')
+ASSESSMENT_OUTCOMES = getAssessmentOutcomes()
+print('Done!')
+# ------------------------------------------------------------------------------
+
 print()
-print('Now, click the button above to extract the skills from a job posting!')
+print('Now, click the button(s) above to extract the skills from a job posting!')
+
 
 def buttonExecution():
 
@@ -635,32 +778,47 @@ def buttonExecution():
   df_userinput = df_userinput.head(1)
 
   for index, row in df_userinput.iterrows():
-    jobtitle = 'Full-Text Description for ' + row['title']
-    display_to_div(jobtitle)
-    display_to_div('ㅤ')
+    jobtitle = row['title']
+
     jobdesc = row['description']
     jobdesc = jobdesc[:1000]
+
+    skills = corpusExtraction(row['description'])
+    SKILLS_LIST.append(skills)
+
+    classified = classifySkills(skills)
+    CLASSIFIED_LIST.append(classified)
+
+    outcomes = createOutcomes(classified, skills)
+    OUTCOMES_LIST.append(outcomes)
+
+    #FEDERAL_INDUSTRIAL.append('federal')
+    #ENTRY_LEVEL.append(1)
+
+    # Display Percent Match to Assessments
+    display_to_div('Alignment to Assessment Outcomes: ' + str(round( computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES ), 2 )) + '%')
+    display_to_div('ㅤ')
+
+    # Display Job Title
+    display_to_div(jobtitle)
+    display_to_div('ㅤ')
+
+    # Display Job Description
     display_to_div(jobdesc + '...')
     display_to_div('ㅤ')
 
-    # SKILLS EXTRACTION
-    skills = corpusExtraction(row['description'])
-    display_to_div('1. The SKILLS collected from Job Posting:')
+    # Display Extracted Skills
+    display_to_div('Step 1. Keyword Extraction')
     for i in skills: display_to_div('> ' + i)
     display_to_div('ㅤ')
-    SKILLS_LIST.append(skills)
 
-    # SKILLS CLASSIFICATION
-    classified = classifySkills(skills)
-    display_to_div('2. The unique CLASSIFICATIONS assigned to this Job Posting:')
+    # Display Classifications
+    display_to_div('Step 2. Skill Classification')
     for i in unique(classified): display_to_div('> ' + i)
     display_to_div('ㅤ')
-    CLASSIFIED_LIST.append(classified)
 
-    # OUTCOME CREATION
-    outcomes = createOutcomes(classified, skills)
-    display_to_div('3. The OUTCOMES generated from Job Posting:')
-
+    # Display Outcomes
+    display_to_div('Step 3. Learning Outcome Generation')
     for i in outcomes: 
       outcomeString = i.split('$')
 
@@ -675,12 +833,8 @@ def buttonExecution():
 
         else: 
           display_to_div('> ' + decompedString)
-
     display_to_div('ㅤ')
-    OUTCOMES_LIST.append(outcomes)
-
-    #FEDERAL_INDUSTRIAL.append('federal')
-    #ENTRY_LEVEL.append(1)
+    #END LOOP
 
   try: df_userinput.insert(0, 'skills', SKILLS_LIST)
   except: pass
@@ -693,6 +847,8 @@ def buttonExecution():
   #df_userinput.to_csv('userinput-extracted.csv', index=False)
 
   display_to_div('Complete!')
+  display_to_div('ㅤ')
+
   """
   # Get user password
   #password = getpass()
@@ -722,10 +878,13 @@ def buttonExecution():
 
   print('Objects Posted to Database!')
   """
+
+#############################################################################################################
+
   """
-  NLP_ASSESSMENTS = NLPthoseOutcomes(AssignmentOutcomes)
+  NLP_ASSESSMENTS = NLPthoseOutcomes(assessmentOutcomes)
   NLP_INDUSTRY    = NLPthoseOutcomes(IndustryOutcomes)
-  NLP_CAE         = NLPthoseOutcomes(CAEOutcomes)
+  NLP_CAE         = NLPthoseOutcomes(inputOutcomes)
   NLP_FEDERAL     = NLPthoseOutcomes(FederalOutcomes)
 
   print('ASSESMENT vs CAE', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_CAE))
