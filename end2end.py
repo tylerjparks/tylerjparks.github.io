@@ -753,7 +753,12 @@ print()
 print('Now, click the button(s) above to extract the skills from a job posting!')
 
 
-def buttonExecution():
+def buttonExecution(customInput=''):
+
+  if customInput == '':
+    pass
+  else:
+    pass
 
   #url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
@@ -825,8 +830,8 @@ def buttonExecution():
     # Display Percent Match to Assessments
     display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
     overallMatch, overallBroadMatch = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES )
-    display_to_div('| ' + str(round(overallMatch,2)) + '%' + ' strict average', "alignmentColumn")
-    display_to_div('| ' + str(round(overallBroadMatch,2)) + '%' + ' broad average', "alignmentColumn")
+    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' strict average', "alignmentColumn")
+    display_to_div('| ' + str(round(overallBroadMatch,1)) + '%' + ' broad average', "alignmentColumn")
     display_to_div('ㅤ', "alignmentColumn")
     #END LOOP
 

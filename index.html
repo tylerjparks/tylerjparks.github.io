@@ -29,19 +29,29 @@
     </head>
     <body>
         <h1>Learning Outcome Alignment - Demo Tool</h1>
-        
+        <p style="width: 60%">
+            This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Ram Dantu 
+            and peers, at the University of North Texas' Network Security Lab. This tool enables a user to view relevant 
+            entry-level job postings, then parse and process those postings -- in real time. Finally, a set a learning outcomes is 
+            created for said posting and compared with a pre-generated set of outcomes directly sourced from UNT cybersecurity 
+            assessments. Get started with the demo by pressing the orange button below!  
+        </p>
+        <p>
+            <i>NOTE: This demo is a work in-progress.</i>
+        </p>
+        <br>
+
         <button id="newPosting" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Start HERE with a new random Job Posting!</button>
         
         <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
-
-        <!--
-        <form>
-            <input type="file" id="myFile" name="filename">
-            <input id="formSubmission" type="submit">
-        </form>
-        -->
-
         <br>
+        <b>ㅤORㅤㅤ</b>
+        <form onsubmit="return false">
+            <label for="txtSub">Submit text of your custom job posting's description:</label>
+            <input type="text" id="textInput" name="textInput" value="text here">
+            <button id="textSubmit" py-click="buttonExecution()">WIP</button>
+        </form>
+
         <hr style="border: 2px solid">
         <h3>Demo Tool Flow Diagram</h3>
         <div class=".img-container">
@@ -75,6 +85,10 @@
             <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
         </div>
 
+        <div id="pushDatabaseDiv" hidden>
+            <button id="pushDatabaseBtn" class="py-button">Push this postings' analytics to our MongoDB Database (WIP)!</button>
+        </div>
+
         <py-config>
             packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy"]
         </py-config>
@@ -87,8 +101,24 @@
             <py-terminal>
         </div>
         <hr style="border: 2px solid">
+        
+        <script>
+            function executePython() {
+                console.log(document.getElementById("textInput").value);
+
+                pyodide.buttonExecution(document.getElementById("textInput").value);
+            }
+        </script>
+
+
 
         <script>
+            // when "hideTerminal" button is pressed...
+            document.getElementById("pushDatabaseBtn").onclick = function() {
+                let user = prompt("MongoDB Username", "user");
+                let pass = prompt("MongoDB Password", "pass");
+            }
+
             // when "hideTerminal" button is pressed...
             document.getElementById("hideTerminal").onclick = function() {
                 if ( document.getElementById("terminalDiv").getAttribute("hidden") ){
@@ -102,6 +132,7 @@
             // when "new Job Posting" button is pressed...
             document.getElementById("newPosting").onclick = function() {
                 clearDiv()
+                document.getElementById("pushDatabaseDiv").removeAttribute("hidden");
             }
 
             // when "isolate posting" button is pressed...
