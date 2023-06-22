@@ -113,7 +113,13 @@
 
 
         <script>
-            // when "hideTerminal" button is pressed...
+            
+            // when "textSubmit" button is pressed...
+            document.getElementById("textSubmit").onclick = function() {
+                clearDiv()
+            }
+
+            // when "pushDatabaseBtn" button is pressed...
             document.getElementById("pushDatabaseBtn").onclick = function() {
                 let user = prompt("MongoDB Username", "user");
                 let pass = prompt("MongoDB Password", "pass");
