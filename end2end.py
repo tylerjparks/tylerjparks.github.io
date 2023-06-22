@@ -60,22 +60,30 @@ from pyscript import Element
 #from pymongo.mongo_client import MongoClient
 #from pymongo.server_api import ServerApi
 
-"""
-# Install and Import spaCy, spaCy Dataset
-!pip install spacy
-!python -m spacy download en_core_web_lg
-
-import spacy
-
-# Load spaCy's NLP functionality.
-nlp = spacy.load("en_core_web_lg")
-"""
-
 ###                      ###
 ###                      ###
 ### FUNCTION DEFINITIONS ###
 ###                      ###
 ###                      ###
+
+# Define naughty words that we do not want to see!
+EXODUS_WORDS = ['desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
+
+
+
+#-------------------------------------------------------------------------------
+# Function: corpusCleanup()
+#
+# Params:   string
+# Purpose:  Prunes an input string.
+#
+def corpusCleanup(corpus):
+  for word in EXODUS_WORDS:
+    corpus = corpus.replace(word, '')
+
+  return corpus
+#
+# END corpusCleanup()
 
 #-------------------------------------------------------------------------------
 # Function: pruned()
@@ -83,17 +91,36 @@ nlp = spacy.load("en_core_web_lg")
 # Params:   keywords (list)
 # Purpose:  Prunes a list of input keywords.
 #
-def pruned(keywords):
-  known_words_of_exodus = ['including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
+def pruned(keywords, title):
 
+  # Convert to lowercase.
   keywords = [x.lower() for x in keywords]
   keywords = list(dict.fromkeys(keywords))
 
-  for x in known_words_of_exodus:
+  # Define words from the job "title" that we do not want to see as skills.
+  titleSections = title.split(' - ')
+  if len(titleSections) > 1:
+    titleSections = titleSections[1:]
+    s = list2string(titleSections, ',')
+    s = s.replace(',', ' ')
+    titleSections = s.split(' ')
+
+    titleSections = [x.lower() for x in titleSections]
+    titleSections = list(dict.fromkeys(titleSections))
+
+    # Eliminate title words.
+    for x in titleSections:
+      for idy, y in enumerate(keywords):
+        if x in y.split(' '):
+          keywords.pop(idy)
+
+  # Eliminate naughty words.
+  for x in EXODUS_WORDS:
     for idy, y in enumerate(keywords):
       if x in y.split(' '):
         keywords.pop(idy)
 
+  # Returned a pruned list.
   return keywords
 #
 # END pruned()
@@ -167,8 +194,8 @@ def list2string(l, delim):
 # Params:   corpus (string)
 # Purpose:  Here, the results of multiple keyword extraction tools can be combined.
 # 
-def corpusExtraction(corpus):
-  return pruned( yakeExtract(corpus) )
+def corpusExtraction(corpus, title):
+  return pruned( yakeExtract( corpusCleanup( corpus ) ), title )
 #
 # END corpusExtraction
 
@@ -318,25 +345,6 @@ def postJSONtoDBcollection(JSONname, collectionName):
 # END postJSONtoDBcollection()
 
 #-------------------------------------------------------------------------------
-# Function: computeAlignmentFromNLP()
-#
-# Params:   Two sets of learning outcomes, generated and NLP'd.
-# Purpose:  Computes the percent alignment between two SETS OF OUTCOMES.
-#
-def computeAlignmentFromNLP(set1, set2):
-  avg = 0
-  count = 0
-  for i in set1:
-    for j in set2:
-      avg += i.similarity(j)
-      count += 1
-
-  avg /= count
-  return avg
-#
-# END computeAlignmentFromNLP()
-
-#-------------------------------------------------------------------------------
 # Function: unique()
 #
 # Params:   list
@@ -357,49 +365,14 @@ def unique(list1):
 # END unique()
 
 #-------------------------------------------------------------------------------
-# Function: NLPthoseOutcomes()
-#
-# Params:   a set of outcomes
-# Purpose:  Returns a list of unique objects within the input list.
-#
-def NLPthoseOutcomes(outcomeSet):
-  ALL_OUTCOMES = []
-  TOPIC_COUNT_LIST = []
-  SUBTOPIC_COUNT_LIST = []
-
-  for i in outcomeSet:
-    for j in i[1]:
-      ALL_OUTCOMES.append(j)
-
-  nodupes = []
-
-  for sublist in ALL_OUTCOMES:
-    if sublist not in nodupes:
-      nodupes.append(sublist)
-
-  allDocs = []
-
-  for i in sorted(nodupes):
-    TOPIC_COUNT_LIST.append(i[0])
-    SUBTOPIC_COUNT_LIST.append(i[1])
-    allDocs.append( nlp( list2string(i, ',') ) )
-
-  #print('TOPIC SUPPORT: ', len(unique(TOPIC_COUNT_LIST)))
-  #print('SUBTOPIC SUPPORT: ', len(unique(SUBTOPIC_COUNT_LIST)))
-
-  return allDocs
-#
-# END NLPthoseOutcomes()
-
-#-------------------------------------------------------------------------------
 # Function: display_to_div()
 #
 # Params:   string
 # Purpose:  Displays string to HTML screen
 #
 
-def display_to_div(txt):
-  display(txt, target="display-write")
+def display_to_div(txt, targetDiv):
+  display(txt, target=targetDiv)
 #
 # END display_to_div()
 
@@ -422,12 +395,12 @@ def pullNewPosting():
     jobdescSHORT = jobdesc[:1000]
 
     # Display Job Title
-    display_to_div(jobtitle)
-    display_to_div('ㅤ')
+    display_to_div(jobtitle, "display-write")
+    display_to_div('ㅤ', "display-write")
 
     # Display Job Description
-    display_to_div(jobdescSHORT + '...')
-    display_to_div('ㅤ')
+    display_to_div(jobdescSHORT + '...', "display-write")
+    display_to_div('ㅤ', "display-write")
   
   return jobdesc
 #
@@ -474,36 +447,54 @@ def isolateStep3():
 #
 def computeAlignment(inputOutcomes, assessmentOutcomes):
   inputOutcomes = inputOutcomes[0]
-  #count = 0
-  #match = 0
+  count = 0
+  match = 0
 
-  lenientCount = 0
-  lenientMatch = 0
+  broadCount = 0
+  broadMatch = 0
+
+  overallMatch = 0
+  overallBroadMatch = 0
+
+  inputOutcomes
+  allAssessmentOutcomes = []
+
+  for outcomes in assessmentOutcomes:
+    for outcome in outcomes:
+      allAssessmentOutcomes.append(outcome)
 
   for ioutcome in inputOutcomes:
-    for outcomes in assessmentOutcomes:       # for each assignment
-      for outcome in outcomes:
-        temp1 = ioutcome.split('$')
-        temp2 = outcome.split('$')
+    for outcome in allAssessmentOutcomes:
+      temp1 = ioutcome.split('$')
+      temp2 = outcome.split('$')
 
-        ioName = temp1[0]
-        oName = temp2[0]
+      ioName = temp1[0]
+      oName = temp2[0]
 
-        ioSkills = temp1[1]
-        oSkills = temp2[1]
+      ioSkills = temp1[1]
+      oSkills = temp2[1]
 
-        lenientMatch += fuzz.partial_ratio(ioSkills,oSkills)
-        lenientCount += 1
+      # Broad Matching
+      #
+      broadMatch += fuzz.partial_ratio(ioSkills,oSkills)
+      broadCount += 1
 
-        # Strict Matching
-        #
-        #if(ioName == oName):
-        #  match += fuzz.partial_ratio(ioSkills,oSkills)
-        #  count += 1
+      # Strict Matching
+      #
+      if(ioName == oName):
+        match += fuzz.partial_ratio(ioSkills,oSkills)
+        count += 1
 
-    #print(match/count)
-    averageMatch = lenientMatch/lenientCount
-  return averageMatch
+    averageOutcomeMatch = match/count
+    averageOutcomeBroadMatch = broadMatch/broadCount
+
+    overallMatch += averageOutcomeMatch
+    overallBroadMatch += averageOutcomeBroadMatch
+
+  averageMatch = overallMatch/len(inputOutcomes)
+  averageBroadMatch = overallBroadMatch/len(inputOutcomes)
+
+  return averageMatch, averageBroadMatch 
 #
 # END computeAlignment()
 
@@ -520,7 +511,7 @@ def getAssessmentOutcomes():
   df_assessments = pd.read_csv(open_url(url))
   
   for index, row in df_assessments.iterrows():
-    skills = corpusExtraction(row['description'])
+    skills = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
     outcomeList.append(outcomes)
 
@@ -781,9 +772,9 @@ def buttonExecution():
     jobtitle = row['title']
 
     jobdesc = row['description']
-    jobdesc = jobdesc[:1000]
+    jobdesc = jobdesc[:2000]
 
-    skills = corpusExtraction(row['description'])
+    skills = corpusExtraction(row['description'], row['title'])
     SKILLS_LIST.append(skills)
 
     classified = classifySkills(skills)
@@ -795,30 +786,26 @@ def buttonExecution():
     #FEDERAL_INDUSTRIAL.append('federal')
     #ENTRY_LEVEL.append(1)
 
-    # Display Percent Match to Assessments
-    display_to_div('Alignment to Assessment Outcomes: ' + str(round( computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES ), 2 )) + '%')
-    display_to_div('ㅤ')
-
     # Display Job Title
-    display_to_div(jobtitle)
-    display_to_div('ㅤ')
+    display_to_div(jobtitle, "display-write")
+    display_to_div('ㅤ', "display-write")
 
     # Display Job Description
-    display_to_div(jobdesc + '...')
-    display_to_div('ㅤ')
+    display_to_div(jobdesc + '...', "display-write")
+    display_to_div('ㅤ', "display-write")
 
     # Display Extracted Skills
-    display_to_div('Step 1. Keyword Extraction')
-    for i in skills: display_to_div('> ' + i)
-    display_to_div('ㅤ')
+    display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
+    for i in skills: display_to_div('|  ' + i, "skillsColumn")
+    display_to_div('ㅤ', "skillsColumn")
 
     # Display Classifications
-    display_to_div('Step 2. Skill Classification')
-    for i in unique(classified): display_to_div('> ' + i)
-    display_to_div('ㅤ')
+    display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
+    for i in unique(classified): display_to_div('|  ' + i, "classifyColumn")
+    display_to_div('ㅤ', "classifyColumn")
 
     # Display Outcomes
-    display_to_div('Step 3. Learning Outcome Generation')
+    display_to_div('Step 3: Learning Outcome Deduction', "outcomeColumnHeader")
     for i in outcomes: 
       outcomeString = i.split('$')
 
@@ -828,12 +815,19 @@ def buttonExecution():
           for indivSkill in skillsList:
             if indivSkill[len(indivSkill)-1] == ',':
               indivSkill = indivSkill[:-1]
-            display_to_div('>> ' + indivSkill)
-          display_to_div('ㅤ')
+            display_to_div('|  |  ' + indivSkill, "outcomeColumn")
+          display_to_div('ㅤ', "outcomeColumn")
 
         else: 
-          display_to_div('> ' + decompedString)
-    display_to_div('ㅤ')
+          display_to_div('|  ' + decompedString, "outcomeColumn")
+    display_to_div('ㅤ', "outcomeColumn")
+
+    # Display Percent Match to Assessments
+    display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
+    overallMatch, overallBroadMatch = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES )
+    display_to_div('| ' + str(round(overallMatch,2)) + '%' + ' strict average', "alignmentColumn")
+    display_to_div('| ' + str(round(overallBroadMatch,2)) + '%' + ' broad average', "alignmentColumn")
+    display_to_div('ㅤ', "alignmentColumn")
     #END LOOP
 
   try: df_userinput.insert(0, 'skills', SKILLS_LIST)
@@ -846,8 +840,8 @@ def buttonExecution():
 
   #df_userinput.to_csv('userinput-extracted.csv', index=False)
 
-  display_to_div('Complete!')
-  display_to_div('ㅤ')
+  #display_to_div('Complete!', "display-write")
+  #display_to_div('ㅤ', "display-write")
 
   """
   # Get user password

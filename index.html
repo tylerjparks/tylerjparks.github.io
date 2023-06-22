@@ -6,59 +6,197 @@
         <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 
         <style>
-          .img-container {
-            text-align: center;
-            display: block;
-            left: 50%;
-          }
+            /* Image Container */
+            .img-container {
+                text-align: center;
+                display: block;
+                left: 50%;
+            }
+
+            /* Three column layout */
+            .column {
+                float: left;
+                width: 25.00%;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
         </style>
     </head>
     <body>
         <h1>Learning Outcome Alignment - Demo Tool</h1>
         
-        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button">Start here with a new random Job Posting!</button>
+        <button id="newPosting" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Start HERE with a new random Job Posting!</button>
+        
+        <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
 
+        <!--
+        <form>
+            <input type="file" id="myFile" name="filename">
+            <input id="formSubmission" type="submit">
+        </form>
+        -->
+
+        <br>
         <hr style="border: 2px solid">
         <h3>Demo Tool Flow Diagram</h3>
         <div class=".img-container">
             <img src="flow.PNG" alt="Flow">
         </div>
         <div class=".btn-container">
-            <button onclick="clearDiv()" py-click="pullNewPosting()" class="py-button" style="margin-left: 10px; background-color: grey" disabled>Isolate Posting</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 94px; background-color: grey" disabled>Isolate Step 1</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 105px; background-color: grey" disabled>Isolate Step 2</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 100px; background-color: grey" disabled>Isolate Step 3</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 105px; background-color: grey" disabled>Isolate Step 4</button>
-            <button onclick="clearDiv()" class="py-button" style="margin-left: 80px; background-color: grey" disabled>Show Assessments</button>
+            <!-- py-click="pullNewPosting()" -->
+            <button id="isoPosting" class="py-button" style="margin-left: 0px;">Isolate Posting</button>
+            <button id="isoStep1" class="py-button" style="margin-left: 105px">Isolate Step 1</button>
+            <button id="isoStep2" class="py-button" style="margin-left: 105px">Isolate Step 2</button>
+            <button id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
+            <button id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
+            <button id="showAll" class="py-button" style="margin-left: 105px; background-color: green; border-color: black; color: white;">Show All</button>
         </div>
+        <br>
         <hr style="border: 2px solid">
 
         <h3>Job Posting Analysis</h3>
 
         <div id="display-write"></div>
 
+        <div class="row">
+            <div id="skillsColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="classifyColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="outcomeColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="alignmentColumnHeader" class="column" style="font-size: 24px;"></div>
+            <hr>
+            <div id="skillsColumn" class="column"></div>
+            <div id="classifyColumn" class="column"></div>
+            <div id="outcomeColumn" class="column"></div>
+            <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
+        </div>
+
         <py-config>
             packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy"]
         </py-config>
         
         <py-script src="/end2end.py"></py-script>
-
-        <button onclick="clearDiv()" py-click="buttonExecution()" class="py-button" href="#top">Back to Top with new Posting!</button>
         
         <hr style="border: 2px solid">
-        <div>
+        <div id="terminalDiv">
             <h3>Python Output Terminal</h3>
             <py-terminal>
         </div>
         <hr style="border: 2px solid">
 
         <script>
-            function clearDiv() {
-               // access the div element and use the replaceChildren() method to clear the div content
-               let div = document.getElementById("display-write");
-               div.replaceChildren();
-               window.location.href='#top'
+            // when "hideTerminal" button is pressed...
+            document.getElementById("hideTerminal").onclick = function() {
+                if ( document.getElementById("terminalDiv").getAttribute("hidden") ){
+                    document.getElementById("terminalDiv").removeAttribute("hidden");
+                }else{
+                    document.getElementById("terminalDiv").setAttribute("hidden", "hidden");
+                }
             }
-         </script>
+
+
+            // when "new Job Posting" button is pressed...
+            document.getElementById("newPosting").onclick = function() {
+                clearDiv()
+            }
+
+            // when "isolate posting" button is pressed...
+            document.getElementById("isoPosting").onclick = function() {
+                document.getElementById("display-write").removeAttribute("hidden");
+
+                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
+            }
+    
+            // when "isolate step 1" button is pressed...
+            document.getElementById("isoStep1").onclick = function() {
+                document.getElementById("skillsColumnHeader").removeAttribute("hidden");
+                document.getElementById("skillsColumn").removeAttribute("hidden");
+
+                document.getElementById("display-write").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
+            }
+
+            // when "isolate step 2" button is pressed...
+            document.getElementById("isoStep2").onclick = function() {
+                document.getElementById("classifyColumnHeader").removeAttribute("hidden");
+                document.getElementById("classifyColumn").removeAttribute("hidden");
+
+                document.getElementById("display-write").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
+            }
+
+            // when "isolate step 3" button is pressed...
+            document.getElementById("isoStep3").onclick = function() {
+                document.getElementById("outcomeColumnHeader").removeAttribute("hidden");
+                document.getElementById("outcomeColumn").removeAttribute("hidden");
+
+                document.getElementById("display-write").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
+            }
+
+            // when "isolate step 4" button is pressed...
+            document.getElementById("isoStep4").onclick = function() {
+                document.getElementById("alignmentColumnHeader").removeAttribute("hidden");
+                document.getElementById("alignmentColumn").removeAttribute("hidden");
+
+                document.getElementById("display-write").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
+                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
+            }
+            
+            // when "show all" button is pressed...
+            document.getElementById("showAll").onclick = function() {
+                document.getElementById("display-write").removeAttribute("hidden");
+                document.getElementById("skillsColumnHeader").removeAttribute("hidden");
+                document.getElementById("skillsColumn").removeAttribute("hidden");
+                document.getElementById("classifyColumnHeader").removeAttribute("hidden");
+                document.getElementById("classifyColumn").removeAttribute("hidden");
+                document.getElementById("outcomeColumnHeader").removeAttribute("hidden");
+                document.getElementById("outcomeColumn").removeAttribute("hidden");
+                document.getElementById("alignmentColumnHeader").removeAttribute("hidden");
+                document.getElementById("alignmentColumn").removeAttribute("hidden");
+            }
+        </script>
+        <script>
+            function clearDiv() {
+                // access the div element and use the replaceChildren() method to clear the div content
+                const divList = ["display-write", "skillsColumnHeader", "classifyColumnHeader", "outcomeColumnHeader", "alignmentColumnHeader", "skillsColumn", "classifyColumn", "outcomeColumn", "alignmentColumn"];
+                for (i in divList) {
+                    let div = document.getElementById(divList[i]);
+                    div.replaceChildren();
+                }
+                window.location.href='#top'
+            }
+        </script>
     </body>
 </html>
