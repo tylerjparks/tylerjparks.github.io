@@ -201,7 +201,7 @@ def list2string(l, delim):
 # Purpose:  Here, the results of multiple keyword extraction tools can be combined.
 # 
 def corpusExtraction(corpus, title):
-  return pruned( yakeExtract( corpusCleanup( corpus ) ), title )
+  return pruned( yakeExtract( corpusCleanup( str(corpus) ) ), title )
 #
 # END corpusExtraction
 
@@ -510,17 +510,26 @@ def computeAlignment(inputOutcomes, assessmentOutcomes):
 # Purpose:  
 #
 def getAssessmentOutcomes():
-  outcomeList = []
-
+  outcomeList1 = []
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   df_assessments = pd.read_csv(open_url(url))
   
   for index, row in df_assessments.iterrows():
     skills = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
-    outcomeList.append(outcomes)
+    outcomeList1.append(outcomes)
 
-  return outcomeList
+  outcomeList2 = []
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/dantu-database-syl.csv"
+  df_assessments = pd.read_csv(open_url(url))
+  
+  for index, row in df_assessments.iterrows():
+    skills = corpusExtraction(str (row['description']), str(row['assessment_title']))
+    outcomes = createOutcomes(classifySkills(skills), skills)
+    outcomeList2.append(outcomes)
+  
+  print('num assessments:', len(outcomeList1 + outcomeList2))
+  return outcomeList1 + outcomeList2
 #
 # END getAssessmentOutcomes()
 
