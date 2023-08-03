@@ -34,29 +34,40 @@
     <body>
 
         <h1>Learning Outcome Alignment - Demo Tool</h1>
-        <p style="width: 60%">
-            This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Ram Dantu 
-            and peers, at the University of North Texas' Network Security Lab. This tool enables a user to view relevant 
-            entry-level job postings, then parse and process those postings -- in real time. Finally, a set a learning outcomes is 
-            created for said posting and compared with a pre-generated set of outcomes directly sourced from UNT cybersecurity 
-            assessments. Get started with the demo by pressing the orange button below!  
+        <p style="width: 75%">
+            This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Dr. Ram Dantu, Leslie Delval, Thomas McCullough  
+            and other peers, at the University of North Texas' Network Security Lab (UNT NSL). 
+        </p>
+        <p style="width: 75%">
+            This tool enables a user to view relevant entry-level job postings, then parse and process those postings -- in real time. 
+            Finally, a set a learning outcomes is created for said posting and compared with a pre-generated set of outcomes directly sourced 
+            from UNT cybersecurity assessments. Get started with the demo by pressing the orange button below!  
         </p>
         <p>
             <i>NOTE: This demo is a work in-progress.</i>
         </p>
         <br>
 
-        <button id="newPosting" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Start HERE with a new random Job Posting!</button>
+        <button id="newPosting" onclick="clearBox('display-write');
+                                         clearBox('skillsColumnHeader');
+                                         clearBox('classifyColumnHeader');
+                                         clearBox('outcomeColumnHeader');
+                                         clearBox('alignmentColumnHeader');
+                                         clearBox('skillsColumn');
+                                         clearBox('classifyColumn');
+                                         clearBox('outcomeColumn');
+                                         clearBox('alignmentColumn');" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Start HERE with a new random Job Posting!</button>
         
         <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
         <br>
+        <!-- 
         <b>ㅤORㅤㅤ</b>
         <form onsubmit="return false">
             <label for="txtSub">Submit text of your custom job posting's description:</label>
             <input type="text" id="textInput" name="textInput" value="text here">
             <button id="textSubmit" py-click="buttonExecution()">WIP</button>
         </form>
-
+        -->
         <hr style="border: 2px solid">
         <h3>Demo Tool Flow Diagram</h3>
         <div class=".img-container">
@@ -95,7 +106,7 @@
         </div>
 
         <py-config>
-            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy"]
+            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy", "numpy"]
         </py-config>
         
         <py-script src="/end2end.py"></py-script>
@@ -112,6 +123,9 @@
                 console.log(document.getElementById("textInput").value);
 
                 pyodide.buttonExecution(document.getElementById("textInput").value);
+            }
+            function clearBox(elementID){
+                document.getElementById(elementID).innerHTML = "";
             }
         </script>
 

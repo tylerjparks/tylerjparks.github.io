@@ -23,6 +23,9 @@ sys.stdout = Unbuffered(sys.stdout)
 ###         ###
 ###         ###
 
+# Import Numpy
+import numpy as np
+
 # Import random
 import random
 
@@ -79,7 +82,7 @@ EXODUS_WORDS = ['desire', 'desired', 'act', 'join', 'full-time', 'remote', 'unit
 #
 def corpusCleanup(corpus):
   for word in EXODUS_WORDS:
-    corpus = corpus.replace(word, '')
+    corpus = str(corpus).replace(word, '')
 
   return corpus
 #
@@ -98,12 +101,12 @@ def pruned(keywords, title):
   keywords = list(dict.fromkeys(keywords))
 
   # Define words from the job "title" that we do not want to see as skills.
-  titleSections = title.split(' - ')
+  titleSections = str(title).split(' - ')
   if len(titleSections) > 1:
     titleSections = titleSections[1:]
     s = list2string(titleSections, ',')
     s = s.replace(',', ' ')
-    titleSections = s.split(' ')
+    titleSections = str(s).split(' ')
 
     titleSections = [x.lower() for x in titleSections]
     titleSections = list(dict.fromkeys(titleSections))
@@ -111,13 +114,13 @@ def pruned(keywords, title):
     # Eliminate title words.
     for x in titleSections:
       for idy, y in enumerate(keywords):
-        if x in y.split(' '):
+        if x in str(y).split(' '):
           keywords.pop(idy)
 
   # Eliminate naughty words.
   for x in EXODUS_WORDS:
     for idy, y in enumerate(keywords):
-      if x in y.split(' '):
+      if x in str(y).split(' '):
         keywords.pop(idy)
 
   # Returned a pruned list.
@@ -158,14 +161,31 @@ def yakeExtract(corpus):
   keywords = yake_Extractor.extract_keywords(corpus)
 
   # Append keywords to a seperate list.
-  l = list()
+  strings = list()
+  scores = list()
   for kw in keywords:
-    l.append(kw[0])
+    strings.append(kw[0])
+    scores.append(kw[1])
 
   # Return the keywords.
-  return l
+  return strings, scores
 #
 # END yakeExtract()
+
+#-------------------------------------------------------------------------------
+# Function: longestWord()
+#
+# Params:   list
+# Purpose:  Returns length of longest word in list
+#
+def longestWord(keywords):
+  max = 0
+  for i in keywords:
+    if len(i) > max:
+      max = len(i)
+  return max
+# 
+# END longestWord()
 
 #-------------------------------------------------------------------------------
 # Function: list2string()
@@ -195,7 +215,9 @@ def list2string(l, delim):
 # Purpose:  Here, the results of multiple keyword extraction tools can be combined.
 # 
 def corpusExtraction(corpus, title):
-  return pruned( yakeExtract( corpusCleanup( corpus ) ), title )
+  strings, scores = yakeExtract( corpusCleanup( corpus ) )
+  #return pruned( strings, title )
+  return pruned(strings,title), scores
 #
 # END corpusExtraction
 
@@ -290,6 +312,8 @@ def classification_report_csv(report):
     report_data.append(row)
   dataframe = pd.DataFrame.from_dict(report_data)
   dataframe.to_csv('classification_report.csv', index = False)
+
+  return dataframe
 #
 # END classification_report_csv()
 
@@ -440,61 +464,99 @@ def isolateStep3():
 # END isolateStep3()
 
 #-------------------------------------------------------------------------------
+# Function: merge()
+#
+# Params:   
+# Purpose:  
+#
+def merge(lst1, lst2):
+    return [a + [b[1]] for (a, b) in zip(lst1, lst2)]
+#
+# END merge()
+
+#-------------------------------------------------------------------------------
+# Function: condenseOutcomes()
+#
+# Params:   
+# Purpose:  
+#
+def condenseOutcomes(outcomes):
+
+  mainOutcomeList = []
+
+  for i in outcomes:
+    l = i.split('$')
+    outcomeName = l[0]
+    outcomeSkills = l[1].split(', ')
+  
+    mainOutcomeList.append([outcomeName, outcomeSkills])
+    
+  mainOutcomeList = sorted(mainOutcomeList, key=lambda x: x[0])
+
+  return mainOutcomeList
+#
+# END condenseOutcomes()
+
+#-------------------------------------------------------------------------------
+# Function: getWeight()
+#
+# Params:   
+# Purpose:  
+#
+def getWeight(name, CLASSES_DF):
+  for i in range(len(CLASSES_DF)):
+    if name == CLASSES_DF['class'].at[i].strip():
+      return CLASSES_DF['f1_score'].at[i]
+#
+# END getWeight()
+
+#-------------------------------------------------------------------------------
 # Function: computeAlignment()
 #
 # Params:   
 # Purpose:  
 #
-def computeAlignment(inputOutcomes, assessmentOutcomes):
+def computeAlignment(inputOutcomes, assessmentOutcomes, le):
   inputOutcomes = inputOutcomes[0]
+
   count = 0
   match = 0
 
-  broadCount = 0
-  broadMatch = 0
-
   overallMatch = 0
-  overallBroadMatch = 0
 
-  inputOutcomes
   allAssessmentOutcomes = []
 
   for outcomes in assessmentOutcomes:
     for outcome in outcomes:
       allAssessmentOutcomes.append(outcome)
 
+  allAssessmentOutcomes = condenseOutcomes(allAssessmentOutcomes)
+
   for ioutcome in inputOutcomes:
     for outcome in allAssessmentOutcomes:
       temp1 = ioutcome.split('$')
-      temp2 = outcome.split('$')
+      temp2 = outcome
 
       ioName = temp1[0]
       oName = temp2[0]
 
       ioSkills = temp1[1]
-      oSkills = temp2[1]
-
-      # Broad Matching
-      #
-      broadMatch += fuzz.partial_ratio(ioSkills,oSkills)
-      broadCount += 1
+      oSkills = list2string(temp2[1], ',')
 
       # Strict Matching
       #
       if(ioName == oName):
-        match += fuzz.partial_ratio(ioSkills,oSkills)
-        count += 1
+        match = fuzz.partial_ratio(ioSkills,oSkills)
 
-    averageOutcomeMatch = match/count
-    averageOutcomeBroadMatch = broadMatch/broadCount
+        if(match >= 50):
+          weight = getWeight(ioName, CLASSES_DF)
+          #print(ioName, 'matched at', match, 'with weight', weight)
+          #match *= weight
+          overallMatch += match
+          count += 1
 
-    overallMatch += averageOutcomeMatch
-    overallBroadMatch += averageOutcomeBroadMatch
-
-  averageMatch = overallMatch/len(inputOutcomes)
-  averageBroadMatch = overallBroadMatch/len(inputOutcomes)
-
-  return averageMatch, averageBroadMatch 
+  #print('final: ', overallMatch, ' / ', count, ' = ', overallMatch/count)
+  return overallMatch/count
 #
 # END computeAlignment()
 
@@ -506,12 +568,20 @@ def computeAlignment(inputOutcomes, assessmentOutcomes):
 #
 def getAssessmentOutcomes():
   outcomeList = []
-
+  
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   df_assessments = pd.read_csv(open_url(url))
-  
+
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/dantu-database-syl.csv"
+  df_assessments_dantu = pd.read_csv(open_url(url))
+
   for index, row in df_assessments.iterrows():
-    skills = corpusExtraction(row['description'], row['assessment_title'])
+    skills, scores = corpusExtraction(row['description'], row['assessment_title'])
+    outcomes = createOutcomes(classifySkills(skills), skills)
+    outcomeList.append(outcomes)
+
+  for index, row in df_assessments_dantu.iterrows():
+    skills, scores = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
     outcomeList.append(outcomes)
 
@@ -680,7 +750,7 @@ report = classification_report(TestingY, preds, target_names = reportlabels)
 
 EXTRA_labels = labels
 
-"""
+'''
 print()
 print()
 print('Accuracy :', KSAT_MODEL_ACCURACY)
@@ -692,9 +762,9 @@ print()
 print(report)
 print()
 print()
-"""
+'''
 
-classification_report_csv(report)
+CLASSES_DF = classification_report_csv(report)
 
 cm = metrics.confusion_matrix(TestingY, preds, labels=labels)
 
@@ -753,7 +823,7 @@ print()
 print('Now, click the button(s) above to extract the skills from a job posting!')
 
 
-def buttonExecution(customInput=''):
+def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
   if customInput == '':
     pass
@@ -779,8 +849,10 @@ def buttonExecution(customInput=''):
     jobdesc = row['description']
     jobdesc = jobdesc[:2000]
 
-    skills = corpusExtraction(row['description'], row['title'])
+    skills, scores = corpusExtraction(row['description'], row['title'])
     SKILLS_LIST.append(skills)
+
+    max = longestWord(skills)
 
     classified = classifySkills(skills)
     CLASSIFIED_LIST.append(classified)
@@ -801,16 +873,44 @@ def buttonExecution(customInput=''):
 
     # Display Extracted Skills
     display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
-    for i in skills: display_to_div('|  ' + i, "skillsColumn")
+    
+    display_to_div('Priority Score w/ Keyword', "skillsColumn")
+    display_to_div('ㅤ', "skillsColumn")
+
+    for i in range(len(skills)): 
+      output1 = skills[i]
+      output2 = str(round((1 - scores[i])*100, 2)) + '%'
+      display_to_div('|  ' + output2 + ' w/ ' + output1, "skillsColumn")
+    
     display_to_div('ㅤ', "skillsColumn")
 
     # Display Classifications
     display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
-    for i in unique(classified): display_to_div('|  ' + i, "classifyColumn")
+
+    display_to_div('Trained Score w/ Class', "classifyColumn")
+    display_to_div('ㅤ', "classifyColumn")
+
+    found_labels = list(le.transform(unique(classified)))
+    found_scores = list()
+    for j in found_labels:
+      for i in range(len(CLASSES_DF)):
+        if j == i:
+          found_scores.append(CLASSES_DF['f1_score'].at[j])
+
+    for idx, x in enumerate(unique(classified)):
+      output1 = x
+      output2 = found_scores[idx]
+
+      display_to_div('| ' + str(round(output2*100, 2)) + '% w/ ' + output1, "classifyColumn")
+
     display_to_div('ㅤ', "classifyColumn")
 
     # Display Outcomes
-    display_to_div('Step 3: Learning Outcome Deduction', "outcomeColumnHeader")
+    display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
+
+    display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
+    display_to_div('ㅤ', "outcomeColumn")
+
     for i in outcomes: 
       outcomeString = i.split('$')
 
@@ -829,9 +929,8 @@ def buttonExecution(customInput=''):
 
     # Display Percent Match to Assessments
     display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
-    overallMatch, overallBroadMatch = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES )
-    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' strict average', "alignmentColumn")
-    display_to_div('| ' + str(round(overallBroadMatch,1)) + '%' + ' broad average', "alignmentColumn")
+    overallMatch = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES, le )
+    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
     display_to_div('ㅤ', "alignmentColumn")
     #END LOOP
 
