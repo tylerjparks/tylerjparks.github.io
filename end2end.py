@@ -2,6 +2,7 @@
 import warnings
 warnings.filterwarnings('ignore')
 
+# Additional Code for System Output? Not sure if 100% required.
 class Unbuffered(object):
    def __init__(self, stream):
        self.stream = stream
@@ -63,16 +64,21 @@ from pyscript import Element
 #from pymongo.mongo_client import MongoClient
 #from pymongo.server_api import ServerApi
 
+
 ###                      ###
 ###                      ###
-### FUNCTION DEFINITIONS ###
+### VARIABLE DEFINITIONS ###
 ###                      ###
 ###                      ###
 
 # Define naughty words that we do not want to see!
 EXODUS_WORDS = ['desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
 
-
+###                      ###
+###                      ###
+### FUNCTION DEFINITIONS ###
+###                      ###
+###                      ###
 
 #-------------------------------------------------------------------------------
 # Function: corpusCleanup()
@@ -394,7 +400,6 @@ def unique(list1):
 # Params:   string
 # Purpose:  Displays string to HTML screen
 #
-
 def display_to_div(txt, targetDiv):
   display(txt, target=targetDiv)
 #
@@ -569,6 +574,7 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
 def getAssessmentOutcomes():
   outcomeList = []
   
+  outcomeList1 = []
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   df_assessments = pd.read_csv(open_url(url))
 
@@ -584,7 +590,8 @@ def getAssessmentOutcomes():
     skills, scores = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
     outcomeList.append(outcomes)
-
+  
+  print('num assessments:', len(outcomeList))
   return outcomeList
 #
 # END getAssessmentOutcomes()
