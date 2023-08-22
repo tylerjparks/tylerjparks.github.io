@@ -59,7 +59,7 @@ from pyodide.http import open_url
 from pyscript import Element
 
 # Install and Import pymongo
-# !pip install pymongo
+#!pip install pymongo
 
 #from pymongo.mongo_client import MongoClient
 #from pymongo.server_api import ServerApi
@@ -530,6 +530,7 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
   overallMatch = 0
 
   allAssessmentOutcomes = []
+  outcomeScores = []
 
   for outcomes in assessmentOutcomes:
     for outcome in outcomes:
@@ -560,8 +561,13 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
           overallMatch += match
           count += 1
 
+          outcomeScores.append([ioName, match])
+
   #print('final: ', overallMatch, ' / ', count, ' = ', overallMatch/count)
-  return overallMatch/count
+
+  
+
+  return overallMatch/count, outcomeScores
 #
 # END computeAlignment()
 
@@ -870,9 +876,13 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
     #FEDERAL_INDUSTRIAL.append('federal')
     #ENTRY_LEVEL.append(1)
 
+    print('')
+    print('-------------------------------------------------------')
+
     # Display Job Title
     display_to_div(jobtitle, "display-write")
     display_to_div('ㅤ', "display-write")
+    print('title: ', jobtitle)
 
     # Display Job Description
     display_to_div(jobdesc + '...', "display-write")
@@ -883,12 +893,22 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
     
     display_to_div('Priority Score w/ Keyword', "skillsColumn")
     display_to_div('ㅤ', "skillsColumn")
+    print('skills: ', skills)
 
+    avg = 0
+    percent = 0
     for i in range(len(skills)): 
       output1 = skills[i]
-      output2 = str(round((1 - scores[i])*100, 2)) + '%'
+      percent = round((1 - scores[i])*100, 2)
+      output2 = str(percent) + '%'
+      avg += percent
       display_to_div('|  ' + output2 + ' w/ ' + output1, "skillsColumn")
     
+    avg /= len(skills)
+    avg = round(avg, 2)
+
+    display_to_div('ㅤ', "skillsColumn")
+    display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
     display_to_div('ㅤ', "skillsColumn")
 
     # Display Classifications
@@ -896,6 +916,7 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
     display_to_div('Trained Score w/ Class', "classifyColumn")
     display_to_div('ㅤ', "classifyColumn")
+    print('classifications: ', unique(classified))
 
     found_labels = list(le.transform(unique(classified)))
     found_scores = list()
@@ -910,6 +931,9 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
       display_to_div('| ' + str(round(output2*100, 2)) + '% w/ ' + output1, "classifyColumn")
 
+    avg = sum(found_scores)/len(found_scores)
+    display_to_div('ㅤ', "classifyColumn")
+    display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
     display_to_div('ㅤ', "classifyColumn")
 
     # Display Outcomes
@@ -917,6 +941,7 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
     display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
     display_to_div('ㅤ', "outcomeColumn")
+    print('outcomes: ', outcomes)
 
     for i in outcomes: 
       outcomeString = i.split('$')
@@ -936,9 +961,17 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
     # Display Percent Match to Assessments
     display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
-    overallMatch = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES, le )
+    overallMatch, outcomeScores = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES, le )
     display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
-    display_to_div('ㅤ', "alignmentColumn")
+    print('matchPercent: ', overallMatch)
+
+    for i in range(len(outcomeScores)): 
+      display_to_div('|  ' + str(round(outcomeScores[i][1], 2)) + '% w/ ' + str(outcomeScores[i][0]) + ' (item ' + str(i+1) + ')', "alignmentSubColumn")
+    display_to_div('ㅤ', "alignmentSubColumn")
+    
+    print('-------------------------------------------------------')
+    print('')
+
     #END LOOP
 
   try: df_userinput.insert(0, 'skills', SKILLS_LIST)

@@ -48,15 +48,7 @@
         </p>
         <br>
 
-        <button id="newPosting" onclick="clearBox('display-write');
-                                         clearBox('skillsColumnHeader');
-                                         clearBox('classifyColumnHeader');
-                                         clearBox('outcomeColumnHeader');
-                                         clearBox('alignmentColumnHeader');
-                                         clearBox('skillsColumn');
-                                         clearBox('classifyColumn');
-                                         clearBox('outcomeColumn');
-                                         clearBox('alignmentColumn');" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Start HERE with a new random Job Posting!</button>
+        <button id="newPosting" onclick="clearAllBoxes();" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Fetch a new Job Posting!</button>
         
         <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
         <br>
@@ -89,7 +81,7 @@
 
         <div id="display-write"></div>
 
-        <div class="row">
+        <div id="analyticInfo" class="row">
             <div id="skillsColumnHeader" class="column" style="font-size: 24px;"></div>
             <div id="classifyColumnHeader" class="column" style="font-size: 24px;"></div>
             <div id="outcomeColumnHeader" class="column" style="font-size: 24px;"></div>
@@ -99,9 +91,10 @@
             <div id="classifyColumn" class="column"></div>
             <div id="outcomeColumn" class="column"></div>
             <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
+            <div id="alignmentSubColumn" class="column"></div>
         </div>
 
-        <div id="pushDatabaseDiv" hidden>
+        <div id="pushDatabaseDiv">
             <button id="pushDatabaseBtn" class="py-button">Push this postings' analytics to our MongoDB Database (WIP)!</button>
         </div>
 
@@ -118,6 +111,20 @@
         </div>
         <hr style="border: 2px solid">
         
+        <!--
+        <script type="module">
+            import com.mongodb.client.MongoClient;
+            import com.mongodb.client.MongoClients;
+            import com.mongodb.client.MongoCollection;
+            import com.mongodb.client.MongoDatabase;
+            import com.mongodb.client.result.InsertManyResult;
+            import org.bson.Document;
+            import org.bson.types.ObjectId;
+            import java.util.List;
+            import java.util.ArrayList;
+        </script>
+        -->
+
         <script>
             function executePython() {
                 console.log(document.getElementById("textInput").value);
@@ -125,21 +132,41 @@
                 pyodide.buttonExecution(document.getElementById("textInput").value);
             }
             function clearBox(elementID){
+
+                while (elementID.firstChild) {
+                    elementID.removeChild(elementID.firstChild);
+                }
+
+                let element = document.getElementById(elementID).querySelector('div');
+                element.innerHTML = "";
+
                 document.getElementById(elementID).innerHTML = "";
+
+            }
+            function clearAllBoxes(){
+                clearBox('display-write');
+                clearBox('skillsColumnHeader');
+                clearBox('classifyColumnHeader');
+                clearBox('outcomeColumnHeader');
+                clearBox('alignmentColumnHeader');
+                clearBox('skillsColumn');
+                clearBox('classifyColumn');
+                clearBox('outcomeColumn');
+                clearBox('alignmentSubColumn');
+                clearBox('alignmentColumn');
+                //clearBox('analyticInfo');
             }
         </script>
 
         <script>
-            
             // when "textSubmit" button is pressed...
-            document.getElementById("textSubmit").onclick = function() {
-                clearDiv()
-            }
+            //document.getElementById("textSubmit").onclick = function() {
+            //    clearDiv()
+            //}
 
             // when "pushDatabaseBtn" button is pressed...
             document.getElementById("pushDatabaseBtn").onclick = function() {
-                let user = prompt("MongoDB Username", "user");
-                let pass = prompt("MongoDB Password", "pass");
+                
             }
 
             // when "hideTerminal" button is pressed...
@@ -154,7 +181,7 @@
 
             // when "new Job Posting" button is pressed...
             document.getElementById("newPosting").onclick = function() {
-                clearDiv()
+                clearAllBoxes()
                 document.getElementById("pushDatabaseDiv").removeAttribute("hidden");
             }
 
