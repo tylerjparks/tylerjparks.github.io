@@ -603,14 +603,24 @@ def getAssessmentOutcomes():
 #
 # END getAssessmentOutcomes()
 
+def saveResults(jobtitle, skills, classified, outcomes, overallMatch):
+  with open("results.txt", "w") as f:
+    f.write(jobtitle)
+    f.write('\n')
+    
+    f.write(list2string(skills,","))
+    f.write('\n')
 
+    f.write(list2string(classified,","))
+    f.write('\n')
 
+    f.write(list2string(outcomes,","))
+    f.write('\n')
 
-
-
-
-
-
+    f.write(str(overallMatch))
+    f.write('\n')
+  f.close()
+  print("SAVED")
 
 
 
@@ -975,22 +985,3 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
     saveResults(jobtitle, skills, unique(classified), outcomes, overallMatch)
   #END LOOP
 #END FUNCTION
-
-def saveResults(jobtitle, skills, classified, outcomes, overallMatch):
-  with open("results.txt", "w") as f:
-    f.write(jobtitle)
-    f.write('\n')
-    
-    f.write(list2string(skills,","))
-    f.write('\n')
-
-    f.write(list2string(classified,","))
-    f.write('\n')
-
-    f.write(list2string(outcomes,","))
-    f.write('\n')
-
-    f.write(str(overallMatch))
-    f.write('\n')
-  f.close()
-  print("SAVED")
