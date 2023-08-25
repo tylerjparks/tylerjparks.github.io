@@ -204,11 +204,12 @@ def list2string(l, delim):
   for i in l:
     s = s + i + delim
   
-  if s[-1] == ' ':
-    s = s[:-1]
+  if s != '':
+    if s[-1] == ' ':
+      s = s[:-1]
 
-  if s[-1] == delim:
-    s = s[:-1]
+    if s[-1] == delim:
+      s = s[:-1]
 
   return s
 # 
@@ -735,6 +736,7 @@ for i in range(0, 3):
 
   model = scikit_log_reg.fit(TrainingX, TrainingY)
 
+
   # get predictions from testing set
   preds = model.predict(TestingX)
 
@@ -755,7 +757,6 @@ preds = max_preds
 KSAT_MODEL_ACCURACY = max_acc
 train_enc = max_train_enc
 TestingY = max_TestingY
-
 
 labels = list(train_enc.transform(train_enc.classes_))
 reportlabels = list(train_enc.classes_)
@@ -834,7 +835,6 @@ print('Done!')
 
 print()
 print('Now, click the button(s) above to extract the skills from a job posting!')
-
 
 def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
 
@@ -972,60 +972,25 @@ def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
     print('-------------------------------------------------------')
     print('')
 
-    #END LOOP
+    saveResults(jobtitle, skills, unique(classified), outcomes, overallMatch)
+  #END LOOP
+#END FUNCTION
 
-  try: df_userinput.insert(0, 'skills', SKILLS_LIST)
-  except: pass
-  df_userinput.insert(0, 'classified', CLASSIFIED_LIST)
-  df_userinput.insert(0, 'outcomes', OUTCOMES_LIST)
+def saveResults(jobtitle, skills, classified, outcomes, overallMatch):
+  with open("results.txt", "w") as f:
+    f.write(jobtitle)
+    f.write('\n')
+    
+    f.write(list2string(skills,","))
+    f.write('\n')
 
-  #df_userinput.insert(0, 'federal_industrial', FEDERAL_INDUSTRIAL)
-  #df_userinput.insert(0, 'entry_level', ENTRY_LEVEL)
+    f.write(list2string(classified,","))
+    f.write('\n')
 
-  #df_userinput.to_csv('userinput-extracted.csv', index=False)
+    f.write(list2string(outcomes,","))
+    f.write('\n')
 
-  #display_to_div('Complete!', "display-write")
-  #display_to_div('ㅤ', "display-write")
-
-  """
-  # Get user password
-  #password = getpass()
-  #password MIGHT equal simcity4
-  password = 'simcity4'
-
-  # Create MongoDB connection URL
-  uri = "mongodb+srv://test-user:"+password+"@m0cluster.4phwiir.mongodb.net/?retryWrites=true&w=majority"
-
-  # Create a new client and connect to the server
-  client = MongoClient(uri, server_api=ServerApi('1'))
-
-  # Clear password var
-  password = ''
-
-  assessmentsDB = client.assessments
-  postingsDB    = client.postings
-  assessmentCollection1 = assessmentsDB.assessment1
-  postingCollection1 = postingsDB.posting1
-
-  assessmentData = loadData('assessments','Labeled - assessments.csv')
-  #federalData = loadData('postings','Labeled - federal200.csv')
-  #industryData = loadData('postings','Labeled - indeed4500.csv')
-
-  print('Posting Assessments to MongoDB Database...')
-  postJSONtoDBcollection(assessmentData, assessmentCollection1)
-
-  print('Objects Posted to Database!')
-  """
-
-#############################################################################################################
-
-  """
-  NLP_ASSESSMENTS = NLPthoseOutcomes(assessmentOutcomes)
-  NLP_INDUSTRY    = NLPthoseOutcomes(IndustryOutcomes)
-  NLP_CAE         = NLPthoseOutcomes(inputOutcomes)
-  NLP_FEDERAL     = NLPthoseOutcomes(FederalOutcomes)
-
-  print('ASSESMENT vs CAE', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_CAE))
-  print('ASSESMENT vs INDUSTRY', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_INDUSTRY))
-  print('ASSESMENT vs FEDERAL', computeAlignmentFromNLP(NLP_ASSESSMENTS, NLP_FEDERAL))
-  """
+    f.write(str(overallMatch))
+    f.write('\n')
+  f.close()
+  print("SAVED")
