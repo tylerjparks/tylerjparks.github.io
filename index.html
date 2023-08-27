@@ -2,125 +2,14 @@
 <html>
     <head>
         <script>
+            downloadFile = "/results.txt"
+
             alert('Welcome to the Learning Outcome Alignment Demo Webpage!\n\nThe following webpage executes Python code using py-script within your browser.\n\nPlease do not refresh this page once you click \"Ok\".\n\nThe site may take up to 5 minutes to load, depending on your browser and system.')
-        </script>
 
-        <!-- py-script stylesheet and scripts -->
-        <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+            const img = document.querySelector('results.txt');
+            const imgButton = document.querySelector('downloadButton');
 
-        <style>
-            /* Image Container */
-            .img-container {
-                text-align: center;
-                display: block;
-                left: 50%;
-            }
-
-            /* Three column layout */
-            .column {
-                float: left;
-                width: 25.00%;
-            }
-
-            /* Clear floats after the columns */
-            .row:after {
-                content: "";
-                display: table;
-                clear: both;
-            }
-        </style>
-    </head>
-    <body>
-
-        <h1>Learning Outcome Alignment - Demo Tool</h1>
-        <p style="width: 75%">
-            This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Dr. Ram Dantu, Leslie Delval, Thomas McCullough  
-            and other peers, at the University of North Texas' Network Security Lab (UNT NSL). 
-        </p>
-        <p style="width: 75%">
-            This tool enables a user to view relevant entry-level job postings, then parse and process those postings -- in real time. 
-            Finally, a set a learning outcomes is created for said posting and compared with a pre-generated set of outcomes directly sourced 
-            from UNT cybersecurity assessments. Get started with the demo by pressing the orange button below!  
-        </p>
-        <p>
-            <i>NOTE: This demo is a work in-progress.</i>
-        </p>
-        <br>
-
-        <button id="newPosting" onclick="clearAllBoxes();" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Fetch a new Job Posting!</button>
-        
-        <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
-        
-        <!-- download file -->
-        <a id="downloadButton" http-equiv="Content-Security-Policy" href="results.txt" download="results.txt">Download</a>
-        
-        <!-- send to proxy -->
-        <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing">Send to Database</a>
-        
-        <br>
-        <!-- 
-        <b>ㅤORㅤㅤ</b>
-        <form onsubmit="return false">
-            <label for="txtSub">Submit text of your custom job posting's description:</label>
-            <input type="text" id="textInput" name="textInput" value="text here">
-            <button id="textSubmit" py-click="buttonExecution()">WIP</button>
-        </form>
-        -->
-        <hr style="border: 2px solid">
-        <h3>Demo Tool Flow Diagram</h3>
-        <div class=".img-container">
-            <img src="flow.PNG" alt="Flow">
-        </div>
-        <div class=".btn-container">
-            <!-- py-click="pullNewPosting()" -->
-            <button id="isoPosting" class="py-button" style="margin-left: 0px;">Isolate Posting</button>
-            <button id="isoStep1" class="py-button" style="margin-left: 105px">Isolate Step 1</button>
-            <button id="isoStep2" class="py-button" style="margin-left: 105px">Isolate Step 2</button>
-            <button id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
-            <button id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
-            <button id="showAll" class="py-button" style="margin-left: 105px; background-color: green; border-color: black; color: white;">Show All</button>
-        </div>
-        <br>
-        <hr style="border: 2px solid">
-
-        <h3>Job Posting Analysis</h3>
-
-        <div id="display-write"></div>
-
-        <div id="analyticInfo" class="row">
-            <div id="skillsColumnHeader" class="column" style="font-size: 24px;"></div>
-            <div id="classifyColumnHeader" class="column" style="font-size: 24px;"></div>
-            <div id="outcomeColumnHeader" class="column" style="font-size: 24px;"></div>
-            <div id="alignmentColumnHeader" class="column" style="font-size: 24px;"></div>
-            <hr>
-            <div id="skillsColumn" class="column"></div>
-            <div id="classifyColumn" class="column"></div>
-            <div id="outcomeColumn" class="column"></div>
-            <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
-            <div id="alignmentSubColumn" class="column"></div>
-        </div>
-
-        <div id="pushDatabaseDiv">
-            <button id="pushDatabaseBtn" class="py-button">Push this postings' analytics to our MongoDB Database (WIP)!</button>
-        </div>
-
-        <py-config>
-            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy", "numpy"]
-        </py-config>
-        
-        <py-script src="/end2end.py"></py-script>
-        
-        <hr style="border: 2px solid">
-        <div id="terminalDiv">
-            <h3>Python Output Terminal</h3>
-            <py-terminal>
-        </div>
-        <hr style="border: 2px solid">
-
-        <script>
             //https://web.dev/patterns/files/save-a-file/demo.html
-
             const saveFile = async (blob, suggestedName) => {
                 // Feature detection. The API needs to be supported
                 // and the app not run in an iframe.
@@ -171,9 +60,6 @@
                 }, 1000);
             };
 
-            const img = document.querySelector('results.txt');
-            const imgButton = document.querySelector('downloadButton');
-
             imgButton.addEventListener('click', async () => {
                 const blob = await fetch(img.src).then((response) => response.blob());
                 await saveFile(blob, 'results.txt');
@@ -209,9 +95,7 @@
                 clearBox('alignmentColumn');
                 //clearBox('analyticInfo');
             }
-        </script>
 
-        <script>
             // when "textSubmit" button is pressed...
             //document.getElementById("textSubmit").onclick = function() {
             //    clearDiv()
@@ -320,8 +204,7 @@
                 document.getElementById("alignmentColumnHeader").removeAttribute("hidden");
                 document.getElementById("alignmentColumn").removeAttribute("hidden");
             }
-        </script>
-        <script>
+
             function clearDiv() {
                 // access the div element and use the replaceChildren() method to clear the div content
                 const divList = ["display-write", "skillsColumnHeader", "classifyColumnHeader", "outcomeColumnHeader", "alignmentColumnHeader", "skillsColumn", "classifyColumn", "outcomeColumn", "alignmentColumn"];
@@ -331,6 +214,125 @@
                 }
                 window.location.href='#top'
             }
-        </script>
+        </script>        
+
+
+
+        <!-- py-script stylesheet and scripts -->
+        <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+
+
+        <style>
+            /* Image Container */
+            .img-container {
+                text-align: center;
+                display: block;
+                left: 50%;
+            }
+
+            /* Three column layout */
+            .column {
+                float: left;
+                width: 25.00%;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Learning Outcome Alignment - Demo Tool</h1>
+        <p style="width: 75%">
+            This tool enables a user to view relevant entry-level job postings, then parse and process those postings -- in real time. 
+            Finally, a set a learning outcomes is created for said posting and compared with a pre-generated set of outcomes directly sourced 
+            from UNT cybersecurity assessments. Get started with the demo by pressing the orange button below!  
+        </p>
+        <p>
+            <i>NOTE: This demo is a work in-progress.</i>
+        </p>
+
+        <button id="newPosting" onclick="clearAllBoxes();" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Fetch a new Job Posting!</button>
+        <hr style="border: 2px solid">
+
+        
+        <!-- download file -->
+        <a style="margin-right: 30px;" id="downloadButton" http-equiv="Content-Security-Policy" href="results.txt" download="results.txt">Download Analytics</a>
+        
+        <!-- send to proxy -->
+        <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing">Send to Database</a>
+        
+        <br>
+        <!-- 
+        <b>ㅤORㅤㅤ</b>
+        <form onsubmit="return false">
+            <label for="txtSub">Submit text of your custom job posting's description:</label>
+            <input type="text" id="textInput" name="textInput" value="text here">
+            <button id="textSubmit" py-click="buttonExecution()">WIP</button>
+        </form>
+        -->
+        <hr style="border: 2px solid">
+        <h3>Demo Tool Flow Diagram</h3>
+        <div class=".img-container">
+            <img src="flow.PNG" alt="Flow">
+        </div>
+        <div class=".btn-container">
+            <!-- py-click="pullNewPosting()" -->
+            <button id="isoPosting" class="py-button" style="margin-left: 0px;">Isolate Posting</button>
+            <button id="isoStep1" class="py-button" style="margin-left: 105px">Isolate Step 1</button>
+            <button id="isoStep2" class="py-button" style="margin-left: 105px">Isolate Step 2</button>
+            <button id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
+            <button id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
+            <button id="showAll" class="py-button" style="margin-left: 105px; background-color: green; border-color: black; color: white;">Show All</button>
+        </div>
+        <br>
+        <hr style="border: 2px solid">
+
+        <h3>Job Posting Analysis</h3>
+
+        <div id="display-write"></div>
+
+        <div id="analyticInfo" class="row">
+            <div id="skillsColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="classifyColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="outcomeColumnHeader" class="column" style="font-size: 24px;"></div>
+            <div id="alignmentColumnHeader" class="column" style="font-size: 24px;"></div>
+            <hr>
+            <div id="skillsColumn" class="column"></div>
+            <div id="classifyColumn" class="column"></div>
+            <div id="outcomeColumn" class="column"></div>
+            <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
+            <div id="alignmentSubColumn" class="column"></div>
+        </div>
+
+        <py-config>
+            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy", "numpy"]
+        </py-config>
+        
+        <py-script src="/end2end.py"></py-script>
+        
+        <hr style="border: 2px solid">
+        <div id="terminalDiv">
+            <h3>Python Output Terminal</h3>
+            <button id="hideTerminal" class="py-button">Hide/Show Terminal</button>
+            <py-terminal>
+        </div>
+        <hr style="border: 2px solid">
+
+        <div id="contactDiv">
+            <h3>About Us</h3>
+            <p style="width: 75%">
+                This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Dr. Ram Dantu, Leslie Delval, Thomas McCullough  
+                and other peers, at the University of North Texas' Network Security Lab (UNT NSL). 
+            </p>
+        </div>
+        <hr style="border: 2px solid">
+        
     </body>
 </html>

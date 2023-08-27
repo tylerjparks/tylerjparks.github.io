@@ -18,6 +18,8 @@ class Unbuffered(object):
 import sys
 sys.stdout = Unbuffered(sys.stdout)
 
+from js import downloadFile
+
 ###         ###
 ###         ###
 ### IMPORTS ###
@@ -72,7 +74,7 @@ from pyscript import Element
 ###                      ###
 
 # Define naughty words that we do not want to see!
-EXODUS_WORDS = ['desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
+EXODUS_WORDS = ['provide', 'ing', 'desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
 
 ###                      ###
 ###                      ###
@@ -604,7 +606,7 @@ def getAssessmentOutcomes():
 # END getAssessmentOutcomes()
 
 def saveResults(jobtitle, skills, classified, outcomes, overallMatch):
-  with open("results.txt", "w") as f:
+  with open(downloadFile, "w") as f:
     f.write(jobtitle)
     f.write('\n')
     
