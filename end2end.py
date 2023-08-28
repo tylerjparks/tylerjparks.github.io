@@ -511,10 +511,10 @@ def condenseOutcomes(outcomes):
 # Params:   
 # Purpose:  
 #
-def getWeight(name, CLASSES_DF):
-  for i in range(len(CLASSES_DF)):
-    if name == CLASSES_DF['class'].at[i].strip():
-      return CLASSES_DF['f1_score'].at[i]
+def getWeight(name, classes_DF):
+  for i in range(len(classes_DF)):
+    if name == classes_DF['class'].at[i].strip():
+      return classes_DF['f1_score'].at[i]
 #
 # END getWeight()
 
@@ -525,8 +525,6 @@ def getWeight(name, CLASSES_DF):
 # Purpose:  
 #
 def computeAlignment(inputOutcomes, assessmentOutcomes, le):
-  inputOutcomes = inputOutcomes[0]
-
   count = 0
   match = 0
 
@@ -558,7 +556,7 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
         match = fuzz.partial_ratio(ioSkills,oSkills)
 
         if(match >= 50):
-          weight = getWeight(ioName, CLASSES_DF)
+          weight = getWeight(ioName, classes_DF)
           #print(ioName, 'matched at', match, 'with weight', weight)
           #match *= weight
           overallMatch += match
@@ -566,10 +564,7 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
 
           outcomeScores.append([ioName, match])
 
-  #print('final: ', overallMatch, ' / ', count, ' = ', overallMatch/count)
-
-  
-
+  if count == 0: count = 1
   return overallMatch/count, outcomeScores
 #
 # END computeAlignment()
@@ -605,30 +600,167 @@ def getAssessmentOutcomes():
 #
 # END getAssessmentOutcomes()
 
+#-------------------------------------------------------------------------------
+# Function: saveResults()
+#
+# Params:   
+# Purpose:  
+#
 def saveResults(jobtitle, skills, classified, outcomes, overallMatch):
-  with open(downloadFile, "w") as f:
-    f.write(jobtitle)
-    f.write('\n')
-    
-    f.write(list2string(skills,","))
-    f.write('\n')
-
-    f.write(list2string(classified,","))
-    f.write('\n')
-
-    f.write(list2string(outcomes,","))
-    f.write('\n')
-
-    f.write(str(overallMatch))
-    f.write('\n')
-  f.close()
   print("SAVED")
 
+#-------------------------------------------------------------------------------
+# Function: buttonExecution()
+#
+# Params:   
+# Purpose:  
+#
+def buttonExecution(customInput=''):
+  global jobtitle_o
+  global skills_o
+  global classified_o
+  global outcomes_o
+  global overallMatch_o 
 
+  if customInput == '':
+    pass
+  else:
+    pass
 
+  #url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
+  df_userinput = pd.read_csv(open_url(url))
+
+  df_userinput = df_userinput.sample(frac=1)
+  df_userinput = df_userinput.head(1)
+
+  for index, row in df_userinput.iterrows():
+    jobtitle = row['title']
+
+    jobdesc = row['description']
+    jobdesc = jobdesc[:2000]
+
+    skills, scores = corpusExtraction(row['description'], row['title'])
+    classified = classifySkills(skills)
+    outcomes = createOutcomes(classified, skills)
+
+    max = longestWord(skills)
+
+    print('')
+    print('-------------------------------------------------------')
+
+    # Display Job Title
+    display_to_div(jobtitle, "display-write")
+    display_to_div('ㅤ', "display-write")
+    print('title: ', jobtitle)
+
+    # Display Job Description
+    display_to_div(jobdesc + '...', "display-write")
+    display_to_div('ㅤ', "display-write")
+
+    # Display Extracted Skills
+    display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
+    
+    display_to_div('Priority Score w/ Keyword', "skillsColumn")
+    display_to_div('ㅤ', "skillsColumn")
+    print('skills: ', skills)
+
+    avg = 0
+    percent = 0
+    for i in range(len(skills)): 
+      output1 = skills[i]
+      percent = round((1 - scores[i])*100, 2)
+      output2 = str(percent) + '%'
+      avg += percent
+      display_to_div('|  ' + output2 + ' w/ ' + output1, "skillsColumn")
+    
+    avg /= len(skills)
+    avg = round(avg, 2)
+
+    display_to_div('ㅤ', "skillsColumn")
+    display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
+    display_to_div('ㅤ', "skillsColumn")
+
+    # Display Classifications
+    display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
+
+    display_to_div('Trained Score w/ Class', "classifyColumn")
+    display_to_div('ㅤ', "classifyColumn")
+    print('classifications: ', unique(classified))
+
+    found_labels = list(train_enc.transform(unique(classified)))
+    found_scores = list()
+    for j in found_labels:
+      for i in range(len(classes_DF)):
+        if j == i:
+          found_scores.append(classes_DF['f1_score'].at[j])
+
+    for idx, x in enumerate(unique(classified)):
+      output1 = x
+      output2 = found_scores[idx]
+
+      display_to_div('| ' + str(round(output2*100, 2)) + '% w/ ' + output1, "classifyColumn")
+
+    avg = sum(found_scores)/len(found_scores)
+    display_to_div('ㅤ', "classifyColumn")
+    display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
+    display_to_div('ㅤ', "classifyColumn")
+
+    # Display Outcomes
+    display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
+
+    display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
+    display_to_div('ㅤ', "outcomeColumn")
+    print('outcomes: ', outcomes)
+
+    for i in outcomes: 
+      outcomeString = i.split('$')
+
+      for decompedString in outcomeString:
+        if ',' in decompedString:
+          skillsList = decompedString.split(', ')
+          for indivSkill in skillsList:
+            if indivSkill[len(indivSkill)-1] == ',':
+              indivSkill = indivSkill[:-1]
+            display_to_div('|  |  ' + indivSkill, "outcomeColumn")
+          display_to_div('ㅤ', "outcomeColumn")
+
+        else: 
+          display_to_div('|  ' + decompedString, "outcomeColumn")
+    display_to_div('ㅤ', "outcomeColumn")
+
+    # Display Percent Match to Assessments
+    display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
+    overallMatch, outcomeScores = computeAlignment( outcomes, ASSESSMENT_OUTCOMES, train_enc )
+    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
+    print('matchPercent: ', overallMatch)
+
+    for i in range(len(outcomeScores)): 
+      display_to_div('|  ' + str(round(outcomeScores[i][1], 2)) + '% w/ ' + str(outcomeScores[i][0]) + ' (item ' + str(i+1) + ')', "alignmentSubColumn")
+    display_to_div('ㅤ', "alignmentSubColumn")
+    
+    print('-------------------------------------------------------')
+    print('')
+
+    jobtitle_o = jobtitle
+    skills_o = skills
+    classified_o = unique(classified)
+    outcomes_o = outcomes
+    overallMatch_o = overallMatch
+
+    print('...saved')
+  #END LOOP
+#END FUNCTION
+
+###             ###
+###             ###
+###             ###
 ###             ###
 ###             ###
 ### DRIVER CODE ###
+###             ###
+###             ###
+###             ###
 ###             ###
 ###             ###
 
@@ -704,11 +836,9 @@ for i in range(0, 3):
 
   # fit training data
   TrainingX = vectorizer.fit_transform(df_train['SKILL'])
-  TrainingX
 
   # transform the testing data using the previous model
   TestingX = vectorizer.transform(df_test['SKILL'])
-  TestingX
 
   train_enc = preprocessing.LabelEncoder()
   test_enc  = preprocessing.LabelEncoder()
@@ -728,10 +858,7 @@ for i in range(0, 3):
 
   # load the testing categories
   TrainingY = encoded_train
-  TrainingY
-
   TestingY = encoded_test
-  TestingY
 
   scikit_log_reg = LogisticRegression(
                                       verbose=0,
@@ -776,65 +903,7 @@ report = classification_report(TestingY, preds, target_names = reportlabels)
 
 EXTRA_labels = labels
 
-'''
-print()
-print()
-print('Accuracy :', KSAT_MODEL_ACCURACY)
-print('Test Size:', max_size)
-print('Labels:', labels)
-
-print()
-print()
-print(report)
-print()
-print()
-'''
-
-CLASSES_DF = classification_report_csv(report)
-
-cm = metrics.confusion_matrix(TestingY, preds, labels=labels)
-
-#print('Confusion Matrix')
-#print(cm)
-
-# Spectral Clustering
-NUM_CLUSTERS = 1
-
-for j in range(NUM_CLUSTERS, NUM_CLUSTERS+1):
-  sc = SpectralClustering(n_clusters = j, affinity ='nearest_neighbors', verbose=0).fit_predict(cm)
-
-  #print(EXTRA_labels)
-  sorted_labels_tuple = sortuple(list(zip(EXTRA_labels, sc)))
-  temp = sorted_labels_tuple
-  #print(temp)
-  sorted_labels = list(zip(*temp))[0]
-  sorted_clusters = list(zip(*temp))[1]
-
-  #for i in sorted_labels_tuple:
-  #  print(i)
-
-  cm = metrics.confusion_matrix(TestingY, preds, labels=sorted_labels)
-
-  # calculate all labels percentage correctness
-  percentages = []
-  i = 0
-  for rows in cm:
-    rowsL = rows.tolist()
-
-    correct = rowsL.pop(i)
-    incorrect = sum(rowsL)
-
-    percentage = round(correct/(incorrect+correct)*100, 2)
-    percentages.append(percentage)
-
-    i = i + 1
-
-  # add percentages to labels
-  temp = list(train_enc.classes_)
-
-  classesPercent = []
-  for classes in temp:
-    classesPercent.append(classes + ' - ' + str(labels.pop(0)) + ' - ' + str(percentages.pop(0)) + '%')
+classes_DF = classification_report_csv(report)
 
 print('Trained!')
 # END model training
@@ -847,143 +916,3 @@ print('Done!')
 
 print()
 print('Now, click the button(s) above to extract the skills from a job posting!')
-
-def buttonExecution(customInput='', CLASSES_DF = CLASSES_DF, le = train_enc):
-
-  if customInput == '':
-    pass
-  else:
-    pass
-
-  #url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
-  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
-  df_userinput = pd.read_csv(open_url(url))
-
-  SKILLS_LIST = []
-  CLASSIFIED_LIST = []
-  OUTCOMES_LIST = []
-  #FEDERAL_INDUSTRIAL = []
-  #ENTRY_LEVEL = []
-
-  df_userinput = df_userinput.sample(frac=1)
-  df_userinput = df_userinput.head(1)
-
-  for index, row in df_userinput.iterrows():
-    jobtitle = row['title']
-
-    jobdesc = row['description']
-    jobdesc = jobdesc[:2000]
-
-    skills, scores = corpusExtraction(row['description'], row['title'])
-    SKILLS_LIST.append(skills)
-
-    max = longestWord(skills)
-
-    classified = classifySkills(skills)
-    CLASSIFIED_LIST.append(classified)
-
-    outcomes = createOutcomes(classified, skills)
-    OUTCOMES_LIST.append(outcomes)
-
-    #FEDERAL_INDUSTRIAL.append('federal')
-    #ENTRY_LEVEL.append(1)
-
-    print('')
-    print('-------------------------------------------------------')
-
-    # Display Job Title
-    display_to_div(jobtitle, "display-write")
-    display_to_div('ㅤ', "display-write")
-    print('title: ', jobtitle)
-
-    # Display Job Description
-    display_to_div(jobdesc + '...', "display-write")
-    display_to_div('ㅤ', "display-write")
-
-    # Display Extracted Skills
-    display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
-    
-    display_to_div('Priority Score w/ Keyword', "skillsColumn")
-    display_to_div('ㅤ', "skillsColumn")
-    print('skills: ', skills)
-
-    avg = 0
-    percent = 0
-    for i in range(len(skills)): 
-      output1 = skills[i]
-      percent = round((1 - scores[i])*100, 2)
-      output2 = str(percent) + '%'
-      avg += percent
-      display_to_div('|  ' + output2 + ' w/ ' + output1, "skillsColumn")
-    
-    avg /= len(skills)
-    avg = round(avg, 2)
-
-    display_to_div('ㅤ', "skillsColumn")
-    display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
-    display_to_div('ㅤ', "skillsColumn")
-
-    # Display Classifications
-    display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
-
-    display_to_div('Trained Score w/ Class', "classifyColumn")
-    display_to_div('ㅤ', "classifyColumn")
-    print('classifications: ', unique(classified))
-
-    found_labels = list(le.transform(unique(classified)))
-    found_scores = list()
-    for j in found_labels:
-      for i in range(len(CLASSES_DF)):
-        if j == i:
-          found_scores.append(CLASSES_DF['f1_score'].at[j])
-
-    for idx, x in enumerate(unique(classified)):
-      output1 = x
-      output2 = found_scores[idx]
-
-      display_to_div('| ' + str(round(output2*100, 2)) + '% w/ ' + output1, "classifyColumn")
-
-    avg = sum(found_scores)/len(found_scores)
-    display_to_div('ㅤ', "classifyColumn")
-    display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
-    display_to_div('ㅤ', "classifyColumn")
-
-    # Display Outcomes
-    display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
-
-    display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
-    display_to_div('ㅤ', "outcomeColumn")
-    print('outcomes: ', outcomes)
-
-    for i in outcomes: 
-      outcomeString = i.split('$')
-
-      for decompedString in outcomeString:
-        if ',' in decompedString:
-          skillsList = decompedString.split(', ')
-          for indivSkill in skillsList:
-            if indivSkill[len(indivSkill)-1] == ',':
-              indivSkill = indivSkill[:-1]
-            display_to_div('|  |  ' + indivSkill, "outcomeColumn")
-          display_to_div('ㅤ', "outcomeColumn")
-
-        else: 
-          display_to_div('|  ' + decompedString, "outcomeColumn")
-    display_to_div('ㅤ', "outcomeColumn")
-
-    # Display Percent Match to Assessments
-    display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
-    overallMatch, outcomeScores = computeAlignment( OUTCOMES_LIST, ASSESSMENT_OUTCOMES, le )
-    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
-    print('matchPercent: ', overallMatch)
-
-    for i in range(len(outcomeScores)): 
-      display_to_div('|  ' + str(round(outcomeScores[i][1], 2)) + '% w/ ' + str(outcomeScores[i][0]) + ' (item ' + str(i+1) + ')', "alignmentSubColumn")
-    display_to_div('ㅤ', "alignmentSubColumn")
-    
-    print('-------------------------------------------------------')
-    print('')
-
-    saveResults(jobtitle, skills, unique(classified), outcomes, overallMatch)
-  #END LOOP
-#END FUNCTION
