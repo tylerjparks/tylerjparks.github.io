@@ -2,6 +2,8 @@
 import warnings
 warnings.filterwarnings('ignore')
 
+import js
+
 # Additional Code for System Output? Not sure if 100% required.
 class Unbuffered(object):
    def __init__(self, stream):
@@ -17,8 +19,6 @@ class Unbuffered(object):
 
 import sys
 sys.stdout = Unbuffered(sys.stdout)
-
-from js import downloadFile
 
 ###         ###
 ###         ###
@@ -439,39 +439,6 @@ def pullNewPosting():
 # END pullNewPosting()
 
 #-------------------------------------------------------------------------------
-# Function: isolateStep1()
-#
-# Params:   
-# Purpose:  
-#
-def isolateStep1():
-  pass
-#
-# END isolateStep1()
-
-#-------------------------------------------------------------------------------
-# Function: isolateStep2()
-#
-# Params:   
-# Purpose:  
-#
-def isolateStep2():
-  pass
-#
-# END isolateStep2()
-
-#-------------------------------------------------------------------------------
-# Function: isolateStep3()
-#
-# Params:   
-# Purpose:  
-#
-def isolateStep3():
-  pass
-#
-# END isolateStep3()
-
-#-------------------------------------------------------------------------------
 # Function: merge()
 #
 # Params:   
@@ -578,24 +545,23 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
 def getAssessmentOutcomes():
   outcomeList = []
   
-  outcomeList1 = []
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   df_assessments = pd.read_csv(open_url(url))
-
-  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/dantu-database-syl.csv"
-  df_assessments_dantu = pd.read_csv(open_url(url))
 
   for index, row in df_assessments.iterrows():
     skills, scores = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
     outcomeList.append(outcomes)
 
-  for index, row in df_assessments_dantu.iterrows():
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/dantu-database-syl.csv"
+  df_assessments = pd.read_csv(open_url(url))
+
+  for index, row in df_assessments.iterrows():
     skills, scores = corpusExtraction(row['description'], row['assessment_title'])
     outcomes = createOutcomes(classifySkills(skills), skills)
     outcomeList.append(outcomes)
   
-  print('num assessments:', len(outcomeList))
+  print('# of Loaded Assessments: ', len(outcomeList))
   return outcomeList
 #
 # END getAssessmentOutcomes()
@@ -622,135 +588,167 @@ def buttonExecution(customInput=''):
   global outcomes_o
   global overallMatch_o 
 
+  df_list = []
+
   if customInput == '':
-    pass
+    url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
+    df_userinput = pd.read_csv(open_url(url))
+    df_userinput = df_userinput.sample(frac=1)
+    df_userinput = df_userinput.head(1)
+    df_list = df_userinput.values.tolist()
+    df_list = df_list[0]
+    
+    print(df_list)
   else:
-    pass
+    print(customInput[:100])
+    df_list = [0,"",[],"User-Defined Job Posting",customInput]
 
-  #url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
-  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Labeled%20-%20federal200.csv"
-  df_userinput = pd.read_csv(open_url(url))
+    print(df_list)
 
-  df_userinput = df_userinput.sample(frac=1)
-  df_userinput = df_userinput.head(1)
 
-  for index, row in df_userinput.iterrows():
-    jobtitle = row['title']
+  jobtitle = df_list[3]
+  jobdesc = df_list[4]
+  jobdesc = jobdesc[:2000]
 
-    jobdesc = row['description']
-    jobdesc = jobdesc[:2000]
+  skills, scores = corpusExtraction(df_list[4], jobtitle)
+  classified = classifySkills(skills)
+  outcomes = createOutcomes(classified, skills)
 
-    skills, scores = corpusExtraction(row['description'], row['title'])
-    classified = classifySkills(skills)
-    outcomes = createOutcomes(classified, skills)
+  print('')
+  print('-------------------------------------------------------')
 
-    max = longestWord(skills)
+  # Display Job Title
+  display_to_div(jobtitle, "display-write")
+  display_to_div('ㅤ', "display-write")
+  print('title: ', jobtitle)
 
-    print('')
-    print('-------------------------------------------------------')
+  # Display Job Description
+  display_to_div(jobdesc + '...', "display-write")
+  display_to_div('ㅤ', "display-write")
 
-    # Display Job Title
-    display_to_div(jobtitle, "display-write")
-    display_to_div('ㅤ', "display-write")
-    print('title: ', jobtitle)
-
-    # Display Job Description
-    display_to_div(jobdesc + '...', "display-write")
-    display_to_div('ㅤ', "display-write")
-
-    # Display Extracted Skills
-    display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
+  # Display Extracted Skills
+  display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
     
-    display_to_div('Priority Score w/ Keyword', "skillsColumn")
-    display_to_div('ㅤ', "skillsColumn")
-    print('skills: ', skills)
+  display_to_div('Priority Score w/ Keyword', "skillsColumn")
+  display_to_div('ㅤ', "skillsColumn")
+  print('skills: ', skills)
 
-    avg = 0
-    percent = 0
-    for i in range(len(skills)): 
-      output1 = skills[i]
-      percent = round((1 - scores[i])*100, 2)
-      output2 = str(percent) + '%'
-      avg += percent
-      display_to_div('|  ' + output2 + ' w/ ' + output1, "skillsColumn")
+  avg = 0
+  percent = 0
+  for i in range(len(skills)): 
+    output1 = skills[i]
+    percent = round((1 - scores[i])*100, 2)
+    output2 = str(percent) + '%'
+    avg += percent
+    display_to_div('|  ' + output2 + ': ' + output1, "skillsColumn")
     
-    avg /= len(skills)
-    avg = round(avg, 2)
+  avg /= len(skills)
+  avg = round(avg, 2)
 
-    display_to_div('ㅤ', "skillsColumn")
-    display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
-    display_to_div('ㅤ', "skillsColumn")
+  display_to_div('ㅤ', "skillsColumn")
+  display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
+  display_to_div('ㅤ', "skillsColumn")
 
-    # Display Classifications
-    display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
+  # Display Classifications
+  display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
 
-    display_to_div('Trained Score w/ Class', "classifyColumn")
-    display_to_div('ㅤ', "classifyColumn")
-    print('classifications: ', unique(classified))
+  display_to_div('Trained Score w/ Class', "classifyColumn")
+  display_to_div('ㅤ', "classifyColumn")
+  print('classifications: ', unique(classified))
 
-    found_labels = list(train_enc.transform(unique(classified)))
-    found_scores = list()
-    for j in found_labels:
-      for i in range(len(classes_DF)):
-        if j == i:
-          found_scores.append(classes_DF['f1_score'].at[j])
+  found_labels = list(train_enc.transform(unique(classified)))
+  found_scores = list()
+  for j in found_labels:
+    for i in range(len(classes_DF)):
+      if j == i:
+        found_scores.append(classes_DF['f1_score'].at[j])
 
-    for idx, x in enumerate(unique(classified)):
-      output1 = x
-      output2 = found_scores[idx]
+  for idx, x in enumerate(unique(classified)):
+    output1 = x
+    output2 = found_scores[idx]
 
-      display_to_div('| ' + str(round(output2*100, 2)) + '% w/ ' + output1, "classifyColumn")
+    display_to_div('| ' + str(round(output2*100, 2)) + '%: ' + output1, "classifyColumn")
 
-    avg = sum(found_scores)/len(found_scores)
-    display_to_div('ㅤ', "classifyColumn")
-    display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
-    display_to_div('ㅤ', "classifyColumn")
+  avg = sum(found_scores)/len(found_scores)
+  display_to_div('ㅤ', "classifyColumn")
+  display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
+  display_to_div('ㅤ', "classifyColumn")
 
-    # Display Outcomes
-    display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
+  # Display Outcomes
+  display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
 
-    display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
-    display_to_div('ㅤ', "outcomeColumn")
-    print('outcomes: ', outcomes)
+  display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
+  display_to_div('ㅤ', "outcomeColumn")
+  print('outcomes: ', outcomes)
 
-    for i in outcomes: 
-      outcomeString = i.split('$')
+  for i in outcomes: 
+    outcomeString = i.split('$')
 
-      for decompedString in outcomeString:
-        if ',' in decompedString:
-          skillsList = decompedString.split(', ')
-          for indivSkill in skillsList:
-            if indivSkill[len(indivSkill)-1] == ',':
-              indivSkill = indivSkill[:-1]
-            display_to_div('|  |  ' + indivSkill, "outcomeColumn")
-          display_to_div('ㅤ', "outcomeColumn")
+    for decompedString in outcomeString:
+      if ',' in decompedString:
+        skillsList = decompedString.split(', ')
+        for indivSkill in skillsList:
+          if indivSkill[len(indivSkill)-1] == ',':
+            indivSkill = indivSkill[:-1]
+          display_to_div('|  |  ' + indivSkill, "outcomeColumn")
+        display_to_div('ㅤ', "outcomeColumn")
 
-        else: 
-          display_to_div('|  ' + decompedString, "outcomeColumn")
-    display_to_div('ㅤ', "outcomeColumn")
+      else: 
+        display_to_div('|  ' + decompedString, "outcomeColumn")
+  display_to_div('ㅤ', "outcomeColumn")
 
-    # Display Percent Match to Assessments
-    display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
-    overallMatch, outcomeScores = computeAlignment( outcomes, ASSESSMENT_OUTCOMES, train_enc )
-    display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
-    print('matchPercent: ', overallMatch)
+  # Display Percent Match to Assessments
+  display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
+  overallMatch, outcomeScores = computeAlignment( outcomes, ASSESSMENT_OUTCOMES, train_enc )
+  display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
+  print('matchPercent: ', overallMatch)
 
-    for i in range(len(outcomeScores)): 
-      display_to_div('|  ' + str(round(outcomeScores[i][1], 2)) + '% w/ ' + str(outcomeScores[i][0]) + ' (item ' + str(i+1) + ')', "alignmentSubColumn")
-    display_to_div('ㅤ', "alignmentSubColumn")
+  for i in range(len(outcomeScores)): 
+    display_to_div('|  ' + str(round(outcomeScores[i][1], 2)) + '%: ' + str(outcomeScores[i][0]) + ' (item ' + str(i+1) + ')', "alignmentSubColumn")
+  display_to_div('ㅤ', "alignmentSubColumn")
     
-    print('-------------------------------------------------------')
-    print('')
+  print('-------------------------------------------------------')
+  print('')
 
-    jobtitle_o = jobtitle
-    skills_o = list2string(skills, ',')
-    classified_o = list2string(unique(classified), ',')
-    outcomes_o = list2string(outcomes, ',')
-    overallMatch_o = str(overallMatch)
+  jobtitle_o = jobtitle
+  skills_o = list2string(skills, ',')
+  classified_o = list2string(unique(classified), ',')
+  outcomes_o = list2string(outcomes, ',')
+  overallMatch_o = str(overallMatch)
 
-    print('...saved')
-  #END LOOP
+  print('...saved')
 #END FUNCTION
+
+def customButtonExecution():
+  buttonExecution(str(js.userContent))
+
+#-------------------------------------------------------------------------------
+# Function: loadMappingData()
+#
+# Params:   
+# Purpose:  
+#
+def loadMappingData(k, s, a, t):
+
+  knowledgeDF = pd.read_csv(open_url(k))
+  knowledgeDF.dropna(subset=['TIER1 JOB'], inplace=True)  # drop empty
+  knowledgeDF['SKILL'] = knowledgeDF['SKILL'].map(lambda x: x.replace('Knowledge of ', '')) # drop all 'Knowledge of '
+    
+  skillDF = pd.read_csv(open_url(s))
+  skillDF.dropna(subset=['TIER1 JOB'], inplace=True)  # drop empty
+  skillDF['SKILL'] = skillDF['SKILL'].map(lambda x: x.replace('Skill in ', ''))  # drop all 'Skill in '
+    
+  abilityDF = pd.read_csv(open_url(a))
+  abilityDF.dropna(subset=['TIER1 JOB'], inplace=True)  # drop empty
+  abilityDF['SKILL'] = abilityDF['SKILL'].map(lambda x: x.replace('Ability to ', ''))  # drop all 'Ability to '
+    
+  taskDF = pd.read_csv(open_url(t))
+  taskDF.dropna(subset=['TIER1 JOB'], inplace=True)  # drop empty
+
+  # append all DFs to single mapping
+  return pd.concat([knowledgeDF, skillDF, abilityDF, taskDF])
+#
+# END loadMappingData()
 
 ###             ###
 ###             ###
@@ -767,100 +765,44 @@ def buttonExecution(customInput=''):
 # Initialize YAKE extractor method with parameters.
 yake_Extractor = yake.KeywordExtractor(lan='en', n=3, dedupLim=0.95, dedupFunc='seqm', top=25, features=None)
 
-# ------------------------------------------------------------------------------
-# Collecting KSAT Data
-print('Collecting KSAT Data...', end=' ')
-
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Knowledge%20Unit%20Mapping.csv"
-knowledgeDF = pd.read_csv(open_url(url))
-
-# drop empty
-knowledgeDF.dropna(subset=['TIER1 JOB'], inplace=True)
-
-# drop all 'Knowledge of '
-ko = 'Knowledge of '
-knowledgeDF['SKILL'] = knowledgeDF['SKILL'].map(lambda x: x.replace(ko, ''))
-
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Skill%20Unit%20Mapping.csv"
-skillDF = pd.read_csv(open_url(url))
-
-# drop empty
-skillDF.dropna(subset=['TIER1 JOB'], inplace=True)
-
-# drop all 'Skill in '
-si = 'Skill in '
-skillDF['SKILL'] = skillDF['SKILL'].map(lambda x: x.replace(si, ''))
-
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Ability%20Unit%20Mapping.csv"
-abilityDF = pd.read_csv(open_url(url))
-
-# drop empty
-abilityDF.dropna(subset=['TIER1 JOB'], inplace=True)
-
-# drop all 'Ability to '
-at = 'Ability to '
-abilityDF['SKILL'] = abilityDF['SKILL'].map(lambda x: x.replace(at, ''))
-
-url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Task%20Unit%20Mapping.csv"
-taskDF = pd.read_csv(open_url(url))
-
-# drop empty
-# nothing in 'SKILL' to drop
-taskDF.dropna(subset=['TIER1 JOB'], inplace=True)
-
-# append all DFs to single mapping
-frames = [knowledgeDF, skillDF, abilityDF, taskDF]
-
-mappingDF = pd.concat(frames)
-
-print('Collected!')
-# ------------------------------------------------------------------------------
-# END collecting KSAT Data
-
 print('Training Logistic Regression Model...')
 TRAINTEST_SPLIT = 0.25
 
-max_acc = 0
-max_size = 0
-max_preds = []
-max_train_enc = []
-max_TestingY = []
-for i in range(0, 3):
+# shuffled approach
+mappings = loadMappingData("https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Knowledge%20Unit%20Mapping.csv","https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Skill%20Unit%20Mapping.csv","https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Ability%20Unit%20Mapping.csv","https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/KSAT%20Mappings%20for%20NLP%20Model%20-%20Task%20Unit%20Mapping.csv")
+df_train, df_test = train_test_split(mappings.sample(frac=1), test_size=(TRAINTEST_SPLIT), random_state=random.randint(0,1000000))
+mappings = ''
 
-  # shuffled approach
-  shuffled = mappingDF.sample(frac=1)
-  df_train, df_test = train_test_split(shuffled, test_size=(TRAINTEST_SPLIT + (i/150)), random_state=random.randint(0,1000000))
+# init. vectorizer
+vectorizer = CountVectorizer()
 
-  # init. vectorizer
-  vectorizer = CountVectorizer()
+# fit training data
+TrainingX = vectorizer.fit_transform(df_train['SKILL'])
 
-  # fit training data
-  TrainingX = vectorizer.fit_transform(df_train['SKILL'])
+# transform the testing data using the previous model
+TestingX = vectorizer.transform(df_test['SKILL'])
 
-  # transform the testing data using the previous model
-  TestingX = vectorizer.transform(df_test['SKILL'])
+train_enc = preprocessing.LabelEncoder()
+test_enc  = preprocessing.LabelEncoder()
 
-  train_enc = preprocessing.LabelEncoder()
-  test_enc  = preprocessing.LabelEncoder()
+# assume the following is the list of unique classes in your data
+#############################################
+train_data_targets = df_train['TIER1 JOB']
+test_data_targets = df_test['TIER1 JOB']
+#############################################
+# fit your targets of the training data to the LabelEncoder instance
+train_enc.fit(train_data_targets)
+test_enc.fit(test_data_targets)
 
-  # assume the following is the list of unique classes in your data
-  #############################################
-  train_data_targets = df_train['TIER1 JOB']
-  test_data_targets = df_test['TIER1 JOB']
-  #############################################
-  # fit your targets of the training data to the LabelEncoder instance
-  train_enc.fit(train_data_targets)
-  test_enc.fit(test_data_targets)
+# encode the targets as numerical labels
+encoded_train = train_enc.transform(train_data_targets)
+encoded_test = test_enc.transform(test_data_targets)
 
-  # encode the targets as numerical labels
-  encoded_train = train_enc.transform(train_data_targets)
-  encoded_test = test_enc.transform(test_data_targets)
+# load the testing categories
+TrainingY = encoded_train
+TestingY = encoded_test
 
-  # load the testing categories
-  TrainingY = encoded_train
-  TestingY = encoded_test
-
-  scikit_log_reg = LogisticRegression(
+scikit_log_reg = LogisticRegression(
                                       verbose=0,
                                       solver='lbfgs', # sag # newton-cg # lbfgs
                                       random_state=random.randint(0,1000000),
@@ -873,29 +815,17 @@ for i in range(0, 3):
                                     )
 
 
-  model = scikit_log_reg.fit(TrainingX, TrainingY)
+model = scikit_log_reg.fit(TrainingX, TrainingY)
 
 
-  # get predictions from testing set
-  preds = model.predict(TestingX)
+# get predictions from testing set
+preds = model.predict(TestingX)
 
-  # generate accuracy
-  KSAT_MODEL_ACCURACY = metrics.accuracy_score(TestingY, preds)
+# generate accuracy
+KSAT_MODEL_ACCURACY = metrics.accuracy_score(TestingY, preds)
 
-  if KSAT_MODEL_ACCURACY > max_acc:
-    max_acc = KSAT_MODEL_ACCURACY
-    max_preds = preds
-    max_train_enc = train_enc
-    max_TestingY = TestingY
-    max_size = TRAINTEST_SPLIT + (i/150)
-
-  #print('ATTEMPT ', i, '-Test Size-', (TRAINTEST_SPLIT + (i/150)), '-', KSAT_MODEL_ACCURACY)
-  print('\tTraining in-progress: ', KSAT_MODEL_ACCURACY)
-
-preds = max_preds
-KSAT_MODEL_ACCURACY = max_acc
-train_enc = max_train_enc
-TestingY = max_TestingY
+#print('ATTEMPT ', i, '-Test Size-', (TRAINTEST_SPLIT + (i/150)), '-', KSAT_MODEL_ACCURACY)
+print('\tTraining in-progress: ', KSAT_MODEL_ACCURACY)
 
 labels = list(train_enc.transform(train_enc.classes_))
 reportlabels = list(train_enc.classes_)

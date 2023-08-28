@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- py-script stylesheet and scripts -->
+        <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+        <link rel="stylesheet" href="style.css" />
+
+        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
         <script>
-            downloadFile = "/results.txt"
+            var downloadFile = "/results.json";
+            var userContent = "";
 
             alert('Welcome to the Learning Outcome Alignment Demo Webpage!\n\nThe following webpage executes Python code using py-script within your browser.\n\nPlease do not refresh this page once you click \"Ok\".\n\nThe site may take up to 5 minutes to load, depending on your browser and system.')
 
-            const filename = downloadFile
-
-            let jsonData = {"title": pyscript.interpreter.globals.get('jobtitle_o'), 
-                            "skills": pyscript.interpreter.globals.get('skills_o'),
-                            "classified": pyscript.interpreter.globals.get('classified_o'),
-                            "outcomes": pyscript.interpreter.globals.get('outcomes_o'),
-                            "overallMatch": pyscript.interpreter.globals.get('overallMatch_o')
-                        }
-            const postingData = jsonData
+            const filename = downloadFile;
+            let postingData = {};
 
             const downloadButton = document.getElementById('downloadButton');
 
@@ -68,20 +68,38 @@
             }, 1000);
             };
 
-            downloadButton.addEventListener('click', async () => {
-                const blob = new Blob([postingData], { type: 'text/plain' });
+            async function savingFile(){
+                let jsonData = {"title": pyscript.interpreter.globals.get('jobtitle_o'), 
+                            "skills": pyscript.interpreter.globals.get('skills_o'),
+                            "classified": pyscript.interpreter.globals.get('classified_o'),
+                            "outcomes": pyscript.interpreter.globals.get('outcomes_o'),
+                            "overallMatch": pyscript.interpreter.globals.get('overallMatch_o')
+                        };
+
+                postingData = jsonData;
+                console.log(postingData);
+
+                //const blob = new Blob([postingData], { type: 'text/plain' });
+                const blob = new Blob([JSON.stringify(postingData, null, 2)], {type: "application/json",});
+                console.log(blob);
                 await saveFile(blob, filename);
-                console.log(postingData)
-            });
+            };
 
+            async function savingAssessments(){
+                let outcomes = {"outcomes": pyscript.interpreter.globals.get('ASSESSMENT_OUTCOMES')};
+                console.log(outcomes);
 
+                //const blob = new Blob([postingData], { type: 'text/plain' });
+                const blob = new Blob([JSON.stringify(outcomes, null, 2)], {type: "application/json",});
+                await saveFile(blob, "/assessmentOutcomes.txt");
+            };
 
 
             function executePython() {
                 console.log(document.getElementById("textInput").value);
 
                 pyodide.buttonExecution(document.getElementById("textInput").value);
-            }
+            };
 
             function clearBox(elementID){
 
@@ -94,7 +112,7 @@
 
                 document.getElementById(elementID).innerHTML = "";
 
-            }
+            };
             function clearAllBoxes(){
                 clearBox('display-write');
                 clearBox('skillsColumnHeader');
@@ -107,116 +125,102 @@
                 clearBox('alignmentSubColumn');
                 clearBox('alignmentColumn');
                 //clearBox('analyticInfo');
-            }
-
-            // when "textSubmit" button is pressed...
-            //document.getElementById("textSubmit").onclick = function() {
-            //    clearDiv()
-            //}
-
-            // when "pushDatabaseBtn" button is pressed...
-            document.getElementById("pushDatabaseBtn").onclick = function() {
-                
-            }
-
-            // when "hideTerminal" button is pressed...
-            document.getElementById("hideTerminal").onclick = function() {
-                if ( document.getElementById("terminalDiv").getAttribute("hidden") ){
-                    document.getElementById("terminalDiv").removeAttribute("hidden");
-                }else{
-                    document.getElementById("terminalDiv").setAttribute("hidden", "hidden");
-                }
-            }
-
-
-            // when "new Job Posting" button is pressed...
-            document.getElementById("newPosting").onclick = function() {
-                clearAllBoxes()
-                document.getElementById("pushDatabaseDiv").removeAttribute("hidden");
-            }
-
-            // when "isolate posting" button is pressed...
-            document.getElementById("isoPosting").onclick = function() {
-                document.getElementById("display-write").removeAttribute("hidden");
-
-                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
-            }
-    
-            // when "isolate step 1" button is pressed...
-            document.getElementById("isoStep1").onclick = function() {
-                document.getElementById("skillsColumnHeader").removeAttribute("hidden");
-                document.getElementById("skillsColumn").removeAttribute("hidden");
-
-                document.getElementById("display-write").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
-            }
-
-            // when "isolate step 2" button is pressed...
-            document.getElementById("isoStep2").onclick = function() {
-                document.getElementById("classifyColumnHeader").removeAttribute("hidden");
-                document.getElementById("classifyColumn").removeAttribute("hidden");
-
-                document.getElementById("display-write").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
-            }
-
-            // when "isolate step 3" button is pressed...
-            document.getElementById("isoStep3").onclick = function() {
-                document.getElementById("outcomeColumnHeader").removeAttribute("hidden");
-                document.getElementById("outcomeColumn").removeAttribute("hidden");
-
-                document.getElementById("display-write").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("alignmentColumn").setAttribute("hidden", "hidden");
-            }
-
-            // when "isolate step 4" button is pressed...
-            document.getElementById("isoStep4").onclick = function() {
-                document.getElementById("alignmentColumnHeader").removeAttribute("hidden");
-                document.getElementById("alignmentColumn").removeAttribute("hidden");
-
-                document.getElementById("display-write").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("classifyColumn").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("skillsColumn").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumnHeader").setAttribute("hidden", "hidden");
-                document.getElementById("outcomeColumn").setAttribute("hidden", "hidden");
-            }
+            };
             
-            // when "show all" button is pressed...
-            document.getElementById("showAll").onclick = function() {
-                document.getElementById("display-write").removeAttribute("hidden");
-                document.getElementById("skillsColumnHeader").removeAttribute("hidden");
-                document.getElementById("skillsColumn").removeAttribute("hidden");
-                document.getElementById("classifyColumnHeader").removeAttribute("hidden");
-                document.getElementById("classifyColumn").removeAttribute("hidden");
-                document.getElementById("outcomeColumnHeader").removeAttribute("hidden");
-                document.getElementById("outcomeColumn").removeAttribute("hidden");
-                document.getElementById("alignmentColumnHeader").removeAttribute("hidden");
-                document.getElementById("alignmentColumn").removeAttribute("hidden");
-            }
+            // when "hideTerminal" button is pressed...
+            function hideShowTerminal() {
+                if ( document.getElementById("pythonTerminal").getAttribute("hidden") ){
+                    document.getElementById("pythonTerminal").removeAttribute("hidden");
+                }else{
+                    document.getElementById("pythonTerminal").setAttribute("hidden", "hidden");
+                }
+            };
+
+            // when "hideShowAboutUs" button is pressed...
+            function hideShowAboutUs() {
+                if ( document.getElementById("contactDiv").getAttribute("hidden") ){
+                    document.getElementById("contactDiv").removeAttribute("hidden");
+                }else{
+                    document.getElementById("contactDiv").setAttribute("hidden", "hidden");
+                }
+            };
+
+            function showEverything(){
+                var divList = ["display-write", "skillsColumnHeader", "classifyColumnHeader", "outcomeColumnHeader", "alignmentColumnHeader", "skillsColumn", "classifyColumn", "outcomeColumn", "alignmentColumn", "alignmentSubColumn"];
+                var arrayLength = divList.length;
+                for (var i = 0; i < arrayLength; i++) {
+                    document.getElementById(divList[i]).removeAttribute("hidden");
+                }
+            };
+
+            function hideEverything(){
+                var divList = ["display-write", "skillsColumnHeader", "classifyColumnHeader", "outcomeColumnHeader", "alignmentColumnHeader", "skillsColumn", "classifyColumn", "outcomeColumn", "alignmentColumn", "alignmentSubColumn"];
+                var arrayLength = divList.length;
+                for (var i = 0; i < arrayLength; i++) {
+                    document.getElementById(divList[i]).setAttribute("hidden", "hidden");
+                }
+            };
+
+            // when "isolate" button(s) are pressed...
+            function hideEverythingBut(show) {
+                //set variables
+                var elem = show.id
+                var divList = ["display-write", "skillsColumnHeader", "classifyColumnHeader", "outcomeColumnHeader", "alignmentColumnHeader", "skillsColumn", "classifyColumn", "outcomeColumn", "alignmentColumn", "alignmentSubColumn"];
+                
+                // show everything, if any button clicked twice.
+                if(elem == "isoPosting"){
+                    elem = ["display-write"];
+                    if(document.getElementById(divList[1]).getAttribute("hidden")){
+                        showEverything();
+                    }
+                }else if(elem == "isoStep1"){
+                    elem = ["skillsColumnHeader", "skillsColumn"];
+                    if(document.getElementById(divList[0]).getAttribute("hidden")){
+                        showEverything();
+                    }
+                }else if(elem == "isoStep2"){
+                    elem = ["classifyColumnHeader", "classifyColumn"];
+                    if(document.getElementById(divList[0]).getAttribute("hidden")){
+                        showEverything();
+                    }
+                }else if(elem == "isoStep3"){
+                    elem = ["outcomeColumnHeader", "outcomeColumn"];
+                    if(document.getElementById(divList[0]).getAttribute("hidden")){
+                        showEverything();
+                    }
+                }else if(elem == "isoStep4"){
+                    elem = ["alignmentColumnHeader", "alignmentColumn", "alignmentSubColumn"];
+                    if(document.getElementById(divList[0]).getAttribute("hidden")){
+                        showEverything();
+                    }
+                }else{
+                    hideEverything();
+                    return;
+                }
+
+                var arrayLength = elem.length;
+                for (var i = 0; i < arrayLength; i++) {
+                    var index = divList.indexOf(elem[i]);
+                    if (index > -1) { // only splice array when item is found
+                        divList.splice(index, 1); // 2nd parameter means remove one item only
+                    }                
+                }
+
+                var arrayLength = divList.length;
+                for (var i = 0; i < arrayLength; i++) {
+                    document.getElementById(divList[i]).setAttribute("hidden", "hidden");
+                }
+
+                var arrayLength = elem.length;
+                for (var i = 0; i < arrayLength; i++) {
+                    document.getElementById(elem[i]).removeAttribute("hidden");
+                }
+            };
+    
+            // when "Apply changes" button is pressed...
+            function refreshCAE() {
+                showEverything();
+            };
 
             function clearDiv() {
                 // access the div element and use the replaceChildren() method to clear the div content
@@ -225,84 +229,150 @@
                     let div = document.getElementById(divList[i]);
                     div.replaceChildren();
                 }
-                window.location.href='#top'
+                window.location.href='#top';
+            };
+
+            function processUserContent(){
+                var fileToLoad = document.getElementById("myFile").files[0];
+
+                var fileReader = new FileReader();
+                fileReader.onload = function(fileLoadedEvent){
+                    var textFromFileLoaded = fileLoadedEvent.target.result;
+                    document.getElementById("display-write").innerHTML = textFromFileLoaded;
+                    userContent = textFromFileLoaded
+                };
+                fileReader.readAsText(fileToLoad, "UTF-8");
+                console.log(userContent)
+            }
+
+            function openTab(evt, cityName) {
+                // Declare all variables
+                var i, tabcontent, tablinks;
+
+                // Get all elements with class="tabcontent" and hide them
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById(cityName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+
+            function setSubHeight(){
+                var parentHeight = document.getElementById('alignmentSubColumn').clientHeight;
+                if (parentHeight > 500) {
+                    document.getElementById('alignmentSubColumn').style.overflowY = "auto";
+                } else {
+                    document.getElementById('alignmentSubColumn').style.overflowY = "none";
+                }
             }
         </script>        
-
-
-
-        <!-- py-script stylesheet and scripts -->
-        <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-
-
-
-        <style>
-            /* Image Container */
-            .img-container {
-                text-align: center;
-                display: block;
-                left: 50%;
-            }
-
-            /* Three column layout */
-            .column {
-                float: left;
-                width: 25.00%;
-            }
-
-            /* Clear floats after the columns */
-            .row:after {
-                content: "";
-                display: table;
-                clear: both;
-            }
-        </style>
     </head>
 
     <body>
         <h1>Learning Outcome Alignment - Demo Tool</h1>
-        <p style="width: 75%">
-            This tool enables a user to view relevant entry-level job postings, then parse and process those postings -- in real time. 
-            Finally, a set a learning outcomes is created for said posting and compared with a pre-generated set of outcomes directly sourced 
-            from UNT cybersecurity assessments. Get started with the demo by pressing the orange button below!  
+        <p style="width: 75%; font-size: 18px;">
+            This tool enables you to view entry-level job postings, then parse and analyze those postings -- in real time. 
+            A set a learning outcomes is created from each posting, then compared with a pre-loaded set of outcomes directly sourced 
+            from CAE Institutions. Get started with the demo by choosing from example or custom data!  
         </p>
-        <p>
+        <p style="width: 75%; font-size: 18px;">
             <i>NOTE: This demo is a work in-progress.</i>
         </p>
 
-        <button id="newPosting" onclick="clearAllBoxes();" py-click="buttonExecution()" class="py-button" style="background-color: orange; border-color: black; color: black">Fetch a new Job Posting!</button>
         <hr style="border: 2px solid">
 
+        <!-- Tab links -->
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'exampleTab')">Try using our example data!</button>
+            <button class="tablinks" onclick="openTab(event, 'customTab')">Use your own custom posting!</button>
+        </div>
         
-        <!-- download file -->
-        <a style="margin-right: 30px;" id="downloadButton" http-equiv="Content-Security-Policy" href="results.txt" download="results.txt">Download Analytics</a>
+        <!-- Tab content -->
+        <div id="exampleTab" class="tabcontent">
+            <p style="width: 75%; font-size: 18px;">
+                <i>Execute the below buttons sequentially!</i>
+            </p>
+
+            <!-- pull new posting -->
+            <button id="newPosting" onclick="clearDiv();" py-click="buttonExecution()" class="py-button" style="background-color: lightsalmon; border-color: black; color: black">
+                1. Fetch a new Job Posting
+            </button>
+    
+            <!-- download file -->
+            <button id="downloadButton" onclick="savingFile();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
+                2. Download Analysis
+            </button>
+    
+            <!--  
+            <button id="downloadassess" onclick="savingAssessments();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
+                Save Assessments
+            </button>
+            -->
+    
+            <!-- send to proxy -->
+            <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing" class="py-button" style="background-color: darkorange; border-color: black; color: black">
+                3. Send it to Database
+            </a>
+        </div>
         
-        <!-- send to proxy -->
-        <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing">Send to Database</a>
-        
+        <div id="customTab" class="tabcontent">
+            <p style="width: 75%; font-size: 18px;">
+                <i>Upload and Submit a job posting of your own below, then execute the buttons sequentially!</i>
+                <i>.TXT only</i>
+            </p>
+    
+            <form>
+                <input type="file" id="myFile" name="filename">
+                <button id="submitFileButton" type="button" onclick="clearDiv();processUserContent();">Submit</button>
+            </form>
+
+            <br>
+            
+            <button type='button' id="processCustom" onclick="clearDiv();" py-click="customButtonExecution()" class="py-button" style="background-color: lightsalmon; border-color: black; color: black">
+                1. Process Custom Input
+            </button>   
+
+            <!-- download file -->
+            <button id="downloadButton" onclick="savingFile();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
+                2. Download Analysis
+            </button>
+
+            <!-- send to proxy -->
+            <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing" class="py-button" style="background-color: darkorange; border-color: black; color: black">
+                3. Send it to Database
+            </a>
+        </div>
+
         <br>
-        <!-- 
-        <b>ㅤORㅤㅤ</b>
-        <form onsubmit="return false">
-            <label for="txtSub">Submit text of your custom job posting's description:</label>
-            <input type="text" id="textInput" name="textInput" value="text here">
-            <button id="textSubmit" py-click="buttonExecution()">WIP</button>
-        </form>
-        -->
+
         <hr style="border: 2px solid">
         <h3>Demo Tool Flow Diagram</h3>
         <div class=".img-container">
             <img src="flow.PNG" alt="Flow">
         </div>
         <div class=".btn-container">
-            <!-- py-click="pullNewPosting()" -->
-            <button id="isoPosting" class="py-button" style="margin-left: 0px;">Isolate Posting</button>
-            <button id="isoStep1" class="py-button" style="margin-left: 105px">Isolate Step 1</button>
-            <button id="isoStep2" class="py-button" style="margin-left: 105px">Isolate Step 2</button>
-            <button id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
-            <button id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
-            <button id="showAll" class="py-button" style="margin-left: 105px; background-color: green; border-color: black; color: white;">Show All</button>
+            <button onclick="hideEverythingBut(this)" id="isoPosting" class="py-button" style="margin-left: 0px;">Isolate Posting</button>
+            <button onclick="hideEverythingBut(this)" id="isoStep1" class="py-button" style="margin-left: 105px">Isolate Step 1</button>
+            <button onclick="hideEverythingBut(this)" id="isoStep2" class="py-button" style="margin-left: 105px">Isolate Step 2</button>
+            <button onclick="hideEverythingBut(this)" id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
+            <button onclick="hideEverythingBut(this)" id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
+
+            <select style="margin-left: 65px;" id="showAll" name="Select CAE">
+                <option value="CAE1" selected>CAE-1</option>
+                <option value="CAE2">CAE-2</option>
+                <option value="CAE3">CAE-3</option>
+            </select>
+            
+            <button onclick="refreshCAE()" class="py-button" style="background-color: green; border-color: black; color: white;">Apply Changes</button>
         </div>
         <br>
         <hr style="border: 2px solid">
@@ -317,33 +387,28 @@
             <div id="outcomeColumnHeader" class="column" style="font-size: 24px;"></div>
             <div id="alignmentColumnHeader" class="column" style="font-size: 24px;"></div>
             <hr>
-            <div id="skillsColumn" class="column"></div>
-            <div id="classifyColumn" class="column"></div>
-            <div id="outcomeColumn" class="column"></div>
+            <div id="skillsColumn" class="column" style="font-size: 20px;"></div>
+            <div id="classifyColumn" class="column" style="font-size: 20px;"></div>
+            <div id="outcomeColumn" class="column" style="font-size: 20px;"></div>
             <div id="alignmentColumn" class="column" style="font-size: 36px;"></div>
-            <div id="alignmentSubColumn" class="column"></div>
+            <div id="alignmentSubColumn" class="column" style="font-size: 20px;"></div>
         </div>
 
-        <py-config>
-            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy", "numpy"]
-        </py-config>
-        
-        <py-script src="/end2end.py"></py-script>
-        
         <hr style="border: 2px solid">
 
         <div>
-            <button id="hideTerminal">Hide/Show Terminal</button>
-        </div>
-
-        <div id="terminalDiv">
             <h3>Python Output Terminal</h3>
+            <button onclick="hideShowTerminal()" id="hideTerminal">Hide/Show Terminal</button>
+            <button onclick="hideShowAboutUs()" id="hideAbout">About Us</button>
+
+        </div>
+        <div id="pythonTerminal" hidden>
             <py-terminal>
         </div>
-        
+
         <hr style="border: 2px solid">
 
-        <div id="contactDiv">
+        <div id="contactDiv" hidden>
             <h3>About Us</h3>
             <p style="width: 75%">
                 This webpage demonstrates the Learning Outcome Alignment Tool developed by Tyler Parks, with Dr. Ram Dantu, Leslie Delval, Thomas McCullough  
@@ -351,6 +416,11 @@
             </p>
         </div>
         <hr style="border: 2px solid">
+
+        <py-config>
+            packages = ["pandas", "yake", "scikit-learn", "fuzzywuzzy", "numpy"]
+        </py-config>
         
+        <py-script src="/end2end.py"></py-script>
     </body>
 </html>
