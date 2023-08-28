@@ -743,10 +743,10 @@ def buttonExecution(customInput=''):
     print('')
 
     jobtitle_o = jobtitle
-    skills_o = skills
-    classified_o = unique(classified)
-    outcomes_o = outcomes
-    overallMatch_o = overallMatch
+    skills_o = list2string(skills, ',')
+    classified_o = list2string(unique(classified), ',')
+    outcomes_o = list2string(outcomes, ',')
+    overallMatch_o = str(overallMatch)
 
     print('...saved')
   #END LOOP
