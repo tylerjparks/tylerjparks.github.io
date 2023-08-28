@@ -3,6 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import js
+import ast
 
 # Additional Code for System Output? Not sure if 100% required.
 class Unbuffered(object):
@@ -74,7 +75,7 @@ from pyscript import Element
 ###                      ###
 
 # Define naughty words that we do not want to see!
-EXODUS_WORDS = ['provide', 'ing', 'desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
+EXODUS_WORDS = ['assign', 'assigned', 'job', 'junior', 'affirmative', 'ment', 'lead', 'salaried', 'salary', 'provide', 'ing', 'desire', 'desired', 'act', 'join', 'full-time', 'remote', 'united', 'states', 'america', 'including', 'include', 'includes', 'understand', 'understanding', 'knowledge', 'skill', 'preferred', 'degree', 'requirements','abilities', 'experience', 'demonstrates', 'demonstrating', 'sales','customer', 'www', 'accommodation', 'recommendation', 'work','days', 'team', 'level', 'manage', 'education', 'genetic', 'san','opportunity', 'genotype', 'ancestry', 'gov', 'duties','qualifications', 'relationships', 'provides', 'related', 'based','hour', 'hours', 'year', 'years', 'issues', 'problems', 'involving','present', 'basic', 'emerging', 'perform', 'performs', 'ability', 'abilities', 'difficult', 'sufficient', 'apply', 'applying', 'identify']
 
 ###                      ###
 ###                      ###
@@ -456,7 +457,6 @@ def merge(lst1, lst2):
 # Purpose:  
 #
 def condenseOutcomes(outcomes):
-
   mainOutcomeList = []
 
   for i in outcomes:
@@ -491,20 +491,18 @@ def getWeight(name, classes_DF):
 # Params:   
 # Purpose:  
 #
-def computeAlignment(inputOutcomes, assessmentOutcomes, le):
+def computeAlignment(inputOutcomes, assessmentOutcomes):
   count = 0
   match = 0
 
   overallMatch = 0
-
-  allAssessmentOutcomes = []
   outcomeScores = []
 
-  for outcomes in assessmentOutcomes:
-    for outcome in outcomes:
-      allAssessmentOutcomes.append(outcome)
+  #for outcomes in assessmentOutcomes:
+  #  for outcome in outcomes:
+  #    allAssessmentOutcomes.append(outcome)
 
-  allAssessmentOutcomes = condenseOutcomes(allAssessmentOutcomes)
+  allAssessmentOutcomes = condenseOutcomes(assessmentOutcomes)
 
   for ioutcome in inputOutcomes:
     for outcome in allAssessmentOutcomes:
@@ -522,7 +520,7 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
       if(ioName == oName):
         match = fuzz.partial_ratio(ioSkills,oSkills)
 
-        if(match >= 50):
+        if(match >= 60):
           weight = getWeight(ioName, classes_DF)
           #print(ioName, 'matched at', match, 'with weight', weight)
           #match *= weight
@@ -542,27 +540,58 @@ def computeAlignment(inputOutcomes, assessmentOutcomes, le):
 # Params:   
 # Purpose:  
 #
-def getAssessmentOutcomes():
-  outcomeList = []
+def getAssessmentOutcomes(CAEChoice):
+  global CAE1_assessments
+  global CAE2_assessments
+  global CAE1_outcomes
+  global CAE2_outcomes
   
+
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/Assignments%20for%20NLP%20Tool%20-%20assignments.csv"
   df_assessments = pd.read_csv(open_url(url))
+  CAE1_assessments = df_assessments.iloc[0].values.tolist()
 
-  for index, row in df_assessments.iterrows():
-    skills, scores = corpusExtraction(row['description'], row['assessment_title'])
-    outcomes = createOutcomes(classifySkills(skills), skills)
-    outcomeList.append(outcomes)
+  # Manual Outcome Creation
+  # for index, row in df_assessments.iterrows():
+  #  skills, scores = corpusExtraction(row['description'], row['assessment_title'])
+  #  outcomes = createOutcomes(classifySkills(skills), skills)
+  #  outcomeList.append(outcomes)
+
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/CAE1_outcomes.txt"
+  CAE1_outcomes = open_url(url).getvalue()
 
   url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/dantu-database-syl.csv"
   df_assessments = pd.read_csv(open_url(url))
-
-  for index, row in df_assessments.iterrows():
-    skills, scores = corpusExtraction(row['description'], row['assessment_title'])
-    outcomes = createOutcomes(classifySkills(skills), skills)
-    outcomeList.append(outcomes)
+  CAE2_assessments = df_assessments.iloc[0].values.tolist()
   
-  print('# of Loaded Assessments: ', len(outcomeList))
-  return outcomeList
+  # Manual Outcome Creation
+  #for index, row in df_assessments.iterrows():
+  #  skills, scores = corpusExtraction(row['description'], row['assessment_title'])
+  #  outcomes = createOutcomes(classifySkills(skills), skills)
+  #  outcomeList.append(outcomes)
+
+  url = "https://raw.githubusercontent.com/tylerjparks/tylerjparks.github.io/main/CAE2_outcomes.txt"
+  CAE2_outcomes = open_url(url).getvalue()
+
+  cae1outcomelist = ast.literal_eval(CAE1_outcomes)
+  cae2outcomelist = ast.literal_eval(CAE2_outcomes)
+
+  temp = []
+  for i in cae1outcomelist:
+    for j in i:
+      temp.append(j)
+
+  temp2 = []
+  for i in cae2outcomelist:
+    for j in i:
+      temp2.append(j)
+
+  if CAEChoice == "CAE-1":
+    return temp
+  elif CAEChoice == "CAE-2":
+    return temp2
+  else:
+    return temp + temp2
 #
 # END getAssessmentOutcomes()
 
@@ -597,7 +626,7 @@ def buttonExecution(customInput=''):
     df_userinput = df_userinput.head(1)
     df_list = df_userinput.values.tolist()
     df_list = df_list[0]
-    
+
     print(df_list)
   else:
     print(customInput[:100])
@@ -628,8 +657,8 @@ def buttonExecution(customInput=''):
 
   # Display Extracted Skills
   display_to_div('Step 1: Extract Keywords', "skillsColumnHeader")
-    
-  display_to_div('Priority Score w/ Keyword', "skillsColumn")
+
+  display_to_div('List of Extracted Keywords with Scores', "skillsColumn")
   display_to_div('ㅤ', "skillsColumn")
   print('skills: ', skills)
 
@@ -652,7 +681,7 @@ def buttonExecution(customInput=''):
   # Display Classifications
   display_to_div('Step 2: Generate Classification Groups', "classifyColumnHeader")
 
-  display_to_div('Trained Score w/ Class', "classifyColumn")
+  display_to_div('Classifications Used with Training Score', "classifyColumn")
   display_to_div('ㅤ', "classifyColumn")
   print('classifications: ', unique(classified))
 
@@ -671,7 +700,7 @@ def buttonExecution(customInput=''):
 
   avg = sum(found_scores)/len(found_scores)
   display_to_div('ㅤ', "classifyColumn")
-  display_to_div('Class Average: ' + str(round(avg, 2)*100) + '%', "classifyColumn")
+  display_to_div('Model Average: ' + str(round(KSAT_MODEL_ACCURACY*100, 2)) + '%', "classifyColumn")
   display_to_div('ㅤ', "classifyColumn")
 
   # Display Outcomes
@@ -699,7 +728,8 @@ def buttonExecution(customInput=''):
 
   # Display Percent Match to Assessments
   display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
-  overallMatch, outcomeScores = computeAlignment( outcomes, ASSESSMENT_OUTCOMES, train_enc )
+
+  overallMatch, outcomeScores = computeAlignment(outcomes, assessment_outcomes)
   display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
   print('matchPercent: ', overallMatch)
 
@@ -749,6 +779,10 @@ def loadMappingData(k, s, a, t):
   return pd.concat([knowledgeDF, skillDF, abilityDF, taskDF])
 #
 # END loadMappingData()
+
+def changeCAEAssessments():
+  assessment_outcomes = getAssessmentOutcomes(str(js.currentCAE))
+  print("using ", str(js.currentCAE))
 
 ###             ###
 ###             ###
@@ -840,7 +874,7 @@ print('Trained!')
 
 # Collecting Assessments and Creating Assessment Outcomes
 print('Collecting Assessments and Creating Assessment Outcomes... ', end=' ')
-ASSESSMENT_OUTCOMES = getAssessmentOutcomes()
+assessment_outcomes = getAssessmentOutcomes(js.currentCAE)
 print('Done!')
 # ------------------------------------------------------------------------------
 

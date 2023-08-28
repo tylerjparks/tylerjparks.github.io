@@ -10,8 +10,9 @@
         <script>
             var downloadFile = "/results.json";
             var userContent = "";
+            var currentCAE = "";
 
-            alert('Welcome to the Learning Outcome Alignment Demo Webpage!\n\nThe following webpage executes Python code using py-script within your browser.\n\nPlease do not refresh this page once you click \"Ok\".\n\nThe site may take up to 5 minutes to load, depending on your browser and system.')
+            alert('Welcome to the Learning Outcome Alignment Demo Webpage!\n\nThe following webpage executes Python code using py-script within your browser.\n\nPlease do not refresh this page once you click \"Ok\".\n\nThe site may take up to 60 seconds to load, depending on your browser and system.')
 
             const filename = downloadFile;
             let postingData = {};
@@ -221,6 +222,50 @@
             function refreshCAE() {
                 showEverything();
             };
+            // when "Apply changes" button is pressed...
+            function viewCAE() {
+                clearDiv();
+
+                var e = document.getElementById("showAllOptions");
+                var value = e.value;
+                var text = e.options[e.selectedIndex].text;
+                currentCAE = text;
+                
+                console.log("value:", value)
+                console.log("text:", text)
+
+                if (text == "CAE-1"){
+                    var assessments = pyscript.interpreter.globals.get('CAE1_assessments');
+                    assessments = "<h4>Example Assessment(s) from CAE-1</h4> <br>" + assessments;
+                    assessments = assessments.split("\',").join("<br>")
+
+                    document.getElementById("display-write").innerHTML = assessments;
+                }else if(text == "CAE-2"){
+                    var assessments = pyscript.interpreter.globals.get('CAE2_assessments');
+                    assessments = "<h4>Example Assessment(s) from CAE-2</h4> <br>" + assessments;
+                    assessments = assessments.split("\',").join("<br>")
+
+                    document.getElementById("display-write").innerHTML = assessments;
+                }else if(text == "CAE-1 Outcomes"){
+                    var outcomes = pyscript.interpreter.globals.get('CAE1_outcomes');
+                    outcomes = "<h4>Example Outcomes(s) from CAE-1</h4> <br>" + outcomes;
+
+                    //outcomes = "<h4>Example Outcome(s) from CAE-1</h4> <br>" + outcomes;
+                    //outcomes = outcomes.split("\',").join("<br>")
+
+                    document.getElementById("display-write").innerHTML = outcomes;
+                }else if(text == "CAE-2 Outcomes"){
+                    var outcomes = pyscript.interpreter.globals.get('CAE2_outcomes');
+                    outcomes = "<h4>Example Outcomes(s) from CAE-2</h4> <br>" + outcomes;
+
+                    //outcomes = "<h4>Example Outcome(s) from CAE-2</h4> <br>" + outcomes;
+                    //outcomes = outcomes.split("\',").join("<br>")
+
+                    document.getElementById("display-write").innerHTML = outcomes;
+                }else{
+                    document.getElementById("display-write").innerHTML = "No CAE-3 Institution yet.";
+                }
+            };
 
             function clearDiv() {
                 // access the div element and use the replaceChildren() method to clear the div content
@@ -327,7 +372,7 @@
         <div id="customTab" class="tabcontent">
             <p style="width: 75%; font-size: 18px;">
                 <i>Upload and Submit a job posting of your own below, then execute the buttons sequentially!</i>
-                <i>.TXT only</i>
+                <b>***.TXT only***</b>
             </p>
     
             <form>
@@ -366,13 +411,21 @@
             <button onclick="hideEverythingBut(this)" id="isoStep3" class="py-button" style="margin-left: 100px">Isolate Step 3</button>
             <button onclick="hideEverythingBut(this)" id="isoStep4" class="py-button" style="margin-left: 105px">Isolate Step 4</button>
 
-            <select style="margin-left: 65px;" id="showAll" name="Select CAE">
+            <select style="margin-left: 65px;" id="showAllOptions" name="Select CAE">
                 <option value="CAE1" selected>CAE-1</option>
-                <option value="CAE2">CAE-2</option>
-                <option value="CAE3">CAE-3</option>
+                <option value="CAE1">CAE-1 Outcomes</option>
+                <option value="CAE1">CAE-2</option>
+                <option value="CAE1">CAE-2 Outcomes</option>
+                <option value="CAE2">CAE-3</option>
+                <option value="CAE3">CAE-3 Outcomes</option>
             </select>
             
-            <button onclick="refreshCAE()" class="py-button" style="background-color: green; border-color: black; color: white;">Apply Changes</button>
+            <button onclick="refreshCAE()" py-click="changeCAEAssessments()" class="py-button" style="background-color: green; border-color: black; color: white;">
+                Apply
+            </button>
+            <button onclick="viewCAE()" class="py-button" style="background-color: green; border-color: black; color: white;">
+                View
+            </button>
         </div>
         <br>
         <hr style="border: 2px solid">
