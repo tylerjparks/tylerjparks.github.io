@@ -529,8 +529,12 @@ def computeAlignment(inputOutcomes, assessmentOutcomes):
 
           outcomeScores.append([ioName, match])
 
-  if count == 0: count = 1
-  return overallMatch/count, outcomeScores
+  try:
+    result = overallMatch/count
+  except:
+    result = 0
+    
+  return result, outcomeScores
 #
 # END computeAlignment()
 
@@ -670,9 +674,12 @@ def buttonExecution(customInput=''):
     output2 = str(percent) + '%'
     avg += percent
     display_to_div('|  ' + output2 + ': ' + output1, "skillsColumn")
-    
-  avg /= len(skills)
-  avg = round(avg, 2)
+  
+  try:
+    avg /= len(skills)
+    avg = round(avg, 2)
+  except:
+    avg = 0
 
   display_to_div('ㅤ', "skillsColumn")
   display_to_div('Keyword Average: ' + str(avg) + '%', "skillsColumn")
@@ -698,7 +705,11 @@ def buttonExecution(customInput=''):
 
     display_to_div('| ' + str(round(output2*100, 2)) + '%: ' + output1, "classifyColumn")
 
-  avg = sum(found_scores)/len(found_scores)
+  try:
+    avg = sum(found_scores)/len(found_scores)
+  except:
+    avg = 0
+
   display_to_div('ㅤ', "classifyColumn")
   display_to_div('Model Average: ' + str(round(KSAT_MODEL_ACCURACY*100, 2)) + '%', "classifyColumn")
   display_to_div('ㅤ', "classifyColumn")
@@ -750,7 +761,11 @@ def buttonExecution(customInput=''):
 #END FUNCTION
 
 def customButtonExecution():
-  buttonExecution(str(js.userContent))
+  if (str(js.userContent)) != "":
+    buttonExecution(str(js.userContent))
+  else:
+    buttonExecution(str(js.userContentPaste))
+
 
 #-------------------------------------------------------------------------------
 # Function: loadMappingData()

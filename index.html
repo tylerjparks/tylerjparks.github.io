@@ -10,6 +10,7 @@
         <script>
             var downloadFile = "/results.json";
             var userContent = "";
+            var userContentPaste = "";
             var currentCAE = "";
 
             alert('Welcome to the Learning Outcome Alignment Demo Webpage!\n\nThe following webpage executes Python code using py-script within your browser.\n\nPlease do not refresh this page once you click \"Ok\".\n\nThe site may take up to 60 seconds to load, depending on your browser and system.')
@@ -284,10 +285,17 @@
                 fileReader.onload = function(fileLoadedEvent){
                     var textFromFileLoaded = fileLoadedEvent.target.result;
                     document.getElementById("display-write").innerHTML = textFromFileLoaded;
-                    userContent = textFromFileLoaded
+                    userContent = textFromFileLoaded;
                 };
                 fileReader.readAsText(fileToLoad, "UTF-8");
-                console.log(userContent)
+                console.log(userContent);
+            }
+
+            function processUserContentPaste(){
+                var pastedText = document.getElementById("pasteBox").value;
+                document.getElementById("display-write").innerHTML = pastedText;
+                userContentPaste = pastedText;
+                console.log(userContentPaste);
             }
 
             function openTab(evt, cityName) {
@@ -377,7 +385,10 @@
     
             <form>
                 <input type="file" id="myFile" name="filename">
-                <button id="submitFileButton" type="button" onclick="clearDiv();processUserContent();">Submit</button>
+                <button id="submitFileButton" type="button" onclick="clearDiv();processUserContent();" style="margin-right: 20px;">Submit</button>
+                OR
+                <input type="text" id="pasteBox" name="pasteText" placeholder="Paste custom data here." style="margin-left: 20px;">
+                <button id="submitFileButton" type="button" onclick="clearDiv();processUserContentPaste();">Submit</button>
             </form>
 
             <br>
