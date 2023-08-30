@@ -231,9 +231,6 @@
                 var value = e.value;
                 var text = e.options[e.selectedIndex].text;
                 currentCAE = text;
-                
-                console.log("value:", value)
-                console.log("text:", text)
 
                 if (text == "CAE-1"){
                     var assessments = pyscript.interpreter.globals.get('CAE1_assessments');
@@ -249,18 +246,24 @@
                     document.getElementById("display-write").innerHTML = assessments;
                 }else if(text == "CAE-1 Outcomes"){
                     var outcomes = pyscript.interpreter.globals.get('CAE1_outcomes');
-                    outcomes = "<h4>Example Outcomes(s) from CAE-1</h4> <br>" + outcomes;
 
-                    //outcomes = "<h4>Example Outcome(s) from CAE-1</h4> <br>" + outcomes;
-                    //outcomes = outcomes.split("\',").join("<br>")
+                    outcomes = "<h4>Example Outcomes(s) from CAE-1</h4>" + outcomes;
+
+                    outcomes = outcomes.split("[").join("<br>")
+                    outcomes = outcomes.split(",\'],").join("<br>")
+                    outcomes = outcomes.split("\', \'").join("<br>")
+                    outcomes = outcomes.split("\'").join("")
 
                     document.getElementById("display-write").innerHTML = outcomes;
+
                 }else if(text == "CAE-2 Outcomes"){
                     var outcomes = pyscript.interpreter.globals.get('CAE2_outcomes');
-                    outcomes = "<h4>Example Outcomes(s) from CAE-2</h4> <br>" + outcomes;
+                    outcomes = "<h4>Example Outcomes(s) from CAE-2</h4>" + outcomes;
 
-                    //outcomes = "<h4>Example Outcome(s) from CAE-2</h4> <br>" + outcomes;
-                    //outcomes = outcomes.split("\',").join("<br>")
+                    outcomes = outcomes.split("[").join("<br>")
+                    outcomes = outcomes.split(",\'],").join("<br>")
+                    outcomes = outcomes.split("\', \'").join("<br>")
+                    outcomes = outcomes.split("\'").join("")
 
                     document.getElementById("display-write").innerHTML = outcomes;
                 }else{
@@ -330,16 +333,29 @@
         </script>        
     </head>
 
-    <body>
-        <h1>Learning Outcome Alignment - Demo Tool</h1>
-        <p style="width: 75%; font-size: 18px;">
-            This tool enables you to view entry-level job postings, then parse and analyze those postings -- in real time. 
-            A set a learning outcomes is created from each posting, then compared with a pre-loaded set of outcomes directly sourced 
-            from CAE Institutions. Get started with the demo by choosing from example or custom data!  
-        </p>
-        <p style="width: 75%; font-size: 18px;">
+    <body style="background-color:lightgray;">
+        <h1>Collection and Compilation of Careers - Online Demo Tool</h1>
+        <h3>The University of North Texas (UNT-CPNC)</h3>
+        <hr style="border: 1px solid">
+
+        <div>
+            <p style="float: left; width: 50%; font-size: 24px;">Introduction</p>
+            <p style="float: left; width: 50%; font-size: 24px;">About Us</p>
+        </div>
+
+        <div>
+            <p style="float: left; width: 50%; font-size: 16px;">
+                This tool enables you to view entry-level job postings, then parse and analyze those postings -- in real time. 
+                A set a learning outcomes is created from each posting, then compared with a pre-loaded set of outcomes directly sourced 
+                from CAE Institutions. Get started with the demo by choosing from one of our examples or with your own custom data!  
+            </p>
+            <p style="float: left; width: 50%; font-size: 16px;">
+                This webpage presents the Collection and Compilation of Careers Demo Tool developed by Tyler Parks, with Dr. Ram Dantu, Leslie Delval, Thomas McCullough  
+                and other peers, at the University of North Texas' Network Security Lab (UNT NSL). Also, in collaboration with the Competency Lab, NIST/NICE, 
+                California State University: San Bernadino (CSUSB), and other organizations.
+            </p>
             <i>NOTE: This demo is a work in-progress.</i>
-        </p>
+        </div>
 
         <hr style="border: 2px solid">
 
@@ -354,17 +370,17 @@
             <p style="width: 75%; font-size: 18px;">
                 <i>Execute the below buttons sequentially!</i>
             </p>
-
+            
             <!-- pull new posting -->
             <button id="newPosting" onclick="clearDiv();" py-click="buttonExecution()" class="py-button" style="background-color: lightsalmon; border-color: black; color: black">
                 1. Fetch a new Job Posting
             </button>
-    
+            →
             <!-- download file -->
             <button id="downloadButton" onclick="savingFile();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
-                2. Download Analysis
+                2. Save Results
             </button>
-    
+            →
             <!--  
             <button id="downloadassess" onclick="savingAssessments();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
                 Save Assessments
@@ -373,7 +389,7 @@
     
             <!-- send to proxy -->
             <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing" class="py-button" style="background-color: darkorange; border-color: black; color: black">
-                3. Send it to Database
+                3. Send Results to CNC
             </a>
         </div>
         
@@ -396,12 +412,12 @@
             <button type='button' id="processCustom" onclick="clearDiv();" py-click="customButtonExecution()" class="py-button" style="background-color: lightsalmon; border-color: black; color: black">
                 1. Process Custom Input
             </button>   
-
+            →
             <!-- download file -->
             <button id="downloadButton" onclick="savingFile();" class="py-button" style="text-decoration: none; background-color: orange; border-color: black; color: black">
                 2. Download Analysis
             </button>
-
+            →
             <!-- send to proxy -->
             <a id="proxyButton" target="_blank" href="https://colab.research.google.com/drive/1D7sVCu5fpnZTcnDUd01XVcswxm4dLjHE?usp=sharing" class="py-button" style="background-color: darkorange; border-color: black; color: black">
                 3. Send it to Database
