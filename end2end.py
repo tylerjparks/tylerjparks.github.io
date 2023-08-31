@@ -715,7 +715,7 @@ def buttonExecution(customInput=''):
   display_to_div('ㅤ', "classifyColumn")
 
   # Display Outcomes
-  display_to_div('Step 3: Learning Outcome Derivation', "outcomeColumnHeader")
+  display_to_div('Step 3: Categorizing Posting Requirements', "outcomeColumnHeader")
 
   display_to_div('Assigning Keywords to Appropriate Classes', "outcomeColumn")
   display_to_div('ㅤ', "outcomeColumn")
