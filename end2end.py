@@ -738,10 +738,10 @@ def buttonExecution(customInput=''):
   display_to_div('ㅤ', "outcomeColumn")
 
   # Display Percent Match to Assessments
-  display_to_div('Step 4: Alignment to Academic Outcomes', "alignmentColumnHeader")
+  display_to_div('Step 4: CAE Match', "alignmentColumnHeader")
 
   overallMatch, outcomeScores = computeAlignment(outcomes, assessment_outcomes)
-  display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' alignment', "alignmentColumn")
+  display_to_div('| ' + str(round(overallMatch,1)) + '% ' + ' match', "alignmentColumn")
   print('matchPercent: ', overallMatch)
 
   for i in range(len(outcomeScores)): 
